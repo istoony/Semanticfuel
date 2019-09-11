@@ -1,0 +1,2 @@
+Foaf-a-matic
+Foaf vocabulary specification
