@@ -19,18 +19,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>11</java.version>
+		<java.version>8</java.version>
 		<jackson.version>2.9.8</jackson.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>net.tinvention.cri.mirror</groupId>
-			<artifactId>cri-mirror-main-client</artifactId>
-			<version>${project.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
