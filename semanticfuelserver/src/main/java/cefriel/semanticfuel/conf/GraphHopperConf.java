@@ -3,7 +3,6 @@ package cefriel.semanticfuel.conf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.graphhopper.GraphHopperAPI;
 import com.graphhopper.api.GraphHopperWeb;
 
 @Configuration
