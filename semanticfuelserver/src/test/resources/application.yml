@@ -1,0 +1,5 @@
+spring:
+  datasource: 
+    password: fueltest-user
+    username: fueltest-password
+    url: jdbc:mysql://localhost:3309/semanticfueltest?useSSL=false&allowPublicKeyRetrieval=true
