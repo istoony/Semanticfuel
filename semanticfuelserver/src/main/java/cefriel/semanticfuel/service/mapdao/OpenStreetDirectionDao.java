@@ -1,4 +1,4 @@
-package cefriel.semanticfuel.service.map;
+package cefriel.semanticfuel.service.mapdao;
 
 import java.util.List;
 import java.util.Map;
@@ -13,13 +13,11 @@ import cefriel.semanticfuel.service.AbstractService;
 import model.Point;
 
 @Service
-public class OpenStreatMapDao extends AbstractService {
+public class OpenStreetDirectionDao extends AbstractService {
 	private static final String DIRECTION_GET_URL = "https://api.openrouteservice.org/v2/directions/driving-car?api_key={key}&start={start}&end={end}";
-	private static final String KEY = "5b3ce3597851110001cf624863f9b5105fef45a2887307080631b7b5";
 
-	public List<Point> server() {
-		String result = performRestRequest();
-
+	public List<Point> server(Point start, Point end) {
+		String result = performRestRequest(start, end);
 		List<Point> points = parseJson(result);
 
 		return points;
@@ -37,11 +35,15 @@ public class OpenStreatMapDao extends AbstractService {
 		return points;
 	}
 
-	private String performRestRequest() {
+	private String performRestRequest(Point start, Point end) {
 		RestTemplate restTemplate = new RestTemplate();
-		String result = restTemplate.getForObject(DIRECTION_GET_URL, String.class, KEY, "8.681495,49.41461",
-				"8.687872,48.420318");
+		String result = restTemplate.getForObject(DIRECTION_GET_URL, String.class, KEY, printPoint(start),
+				printPoint(end));
 
 		return result;
+	}
+
+	private String printPoint(Point start) {
+		return start.getLatitude() + "," + start.getLongitude();
 	}
 }

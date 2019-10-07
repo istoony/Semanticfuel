@@ -6,20 +6,34 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cefriel.semanticfuel.service.mapdao.OpenStreetDirectionDao;
+import cefriel.semanticfuel.service.mapdao.OpenStreetPlacesDao;
 import cefriel.semanticfuel.utils.AbstractTest;
+import model.Place;
 import model.Point;
 
 public class OpenStreetMapDaoTest extends AbstractTest {
 
 	@Autowired
-	private OpenStreatMapDao openStreatMapDao;
+	private OpenStreetDirectionDao openStreatDirectionDao;
+	
+	@Autowired
+	private OpenStreetPlacesDao openStreetPlacesDao;
 
 	@Test
 	public void getRequestTest() {
-		List<Point> result = openStreatMapDao.server();
+		Point start = new Point(8.681495,49.41461);
+		Point end = new Point(9.687872,39.420318);
+		List<Point> result = openStreatDirectionDao.server(start, end);
 		for (Point point : result) {
 			LOG.debug("Point found {}", point);
 		}
+	}
+	
+	@Test
+	public void getPlacesTest() {
+		List<Place> result = openStreetPlacesDao.getPlace("Venice");
+		LOG.debug("Places Found = {}", result);
 	}
 	
 	@Test

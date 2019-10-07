@@ -2,8 +2,8 @@ package model;
 
 public class Point {
 
-	Double latitude;
-	Double longitude;
+	private Double latitude;
+	private Double longitude;
 
 	public Point(Double latitude, Double longitude) {
 		super();
