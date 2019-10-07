@@ -3,10 +3,15 @@ package cefriel.semanticfuel.service.fetcher;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,10 +26,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import be.ugent.rml.Executor;
+import be.ugent.rml.Utils;
+import be.ugent.rml.functions.FunctionLoader;
+import be.ugent.rml.functions.lib.GrelProcessor;
+import be.ugent.rml.functions.lib.IDLabFunctions;
+import be.ugent.rml.records.RecordsFactory;
+import be.ugent.rml.store.QuadStore;
+import be.ugent.rml.store.RDF4JStore;
+import be.ugent.rml.term.Term;
+
 @Service
 @EnableScheduling
 public class FetcherService {
-	private final static String MISE_URL = "https://www.mise.gov.it/images/exportCSV/";
+	private final static String MISE_URL = "https://www.mise.gov.it/images/exportCSV";
 	private final static String SOURCE_PRICE = "prezzo_alle_8.csv";
 	private final static String SOURCE_LIST = "anagrafica_impianti_attivi.csv";
 
@@ -42,7 +57,7 @@ public class FetcherService {
 			if (listFetched.get() && priceFetched.get()) {
 				// the two sources are saved at the given save path
 				// call the RML mapper routines to update the ontology
-
+				QuadStore ontology = createOntology();
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -73,7 +88,7 @@ public class FetcherService {
 
 		if (response.getStatusCode() == HttpStatus.OK) {
 			try {
-				Files.write(Paths.get(savePath + resource), response.getBody());
+				Files.write(Paths.get(savePath + "/" + resource), response.getBody());
 			} catch (IOException e) {
 				e.printStackTrace();
 				return new AsyncResult<>(false);
@@ -81,5 +96,43 @@ public class FetcherService {
 			return new AsyncResult<>(true);
 		}
 		return new AsyncResult<>(false);
+	}
+
+	private QuadStore createOntology() {
+		String mOptionValue = "";
+
+		RDF4JStore rmlStore = Utils.readTurtle(ClassLoader.class.getResourceAsStream(mOptionValue), RDFFormat.TURTLE);
+		RecordsFactory factory = new RecordsFactory(System.getProperty("user.dir"));
+
+		String outputFormat = "turtle";
+		QuadStore outputStore = new RDF4JStore();
+
+		Map<String, Class> libraryMap = new HashMap<>();
+		libraryMap.put("GrelFunctions", GrelProcessor.class);
+		libraryMap.put("IDLabFunctions", IDLabFunctions.class);
+		FunctionLoader functionLoader = new FunctionLoader(null, null, libraryMap);
+
+		// We have to get the InputStreams of the RML documents again,
+		// because we can only use an InputStream once.
+		Executor executor;
+		try {
+			executor = new Executor(rmlStore, factory, functionLoader, outputStore,
+					Utils.getBaseDirectiveTurtle(ClassLoader.class.getResourceAsStream(mOptionValue)));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		List<Term> triplesMaps = new ArrayList<>();
+		QuadStore result;
+		try {
+			result = executor.execute(triplesMaps, false, null);
+			result.setNamespaces(rmlStore.getNamespaces());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return result;
 	}
 }
