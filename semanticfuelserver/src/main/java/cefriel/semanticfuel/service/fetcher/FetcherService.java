@@ -35,10 +35,11 @@ import be.ugent.rml.records.RecordsFactory;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.store.RDF4JStore;
 import be.ugent.rml.term.Term;
+import cefriel.semanticfuel.service.AbstractService;
 
 @Service
 @EnableScheduling
-public class FetcherService {
+public class FetcherService extends AbstractService {
 	private final static String MISE_URL = "https://www.mise.gov.it/images/exportCSV";
 	private final static String SOURCE_PRICE = "prezzo_alle_8.csv";
 	private final static String SOURCE_LIST = "anagrafica_impianti_attivi.csv";
