@@ -57,7 +57,7 @@ public class FetcherService extends AbstractService {
 			// blocking calls
 			if (listFetched.get() && priceFetched.get()) {
 				// the two sources are saved at the given save path
-				// call the RML mapper routines to update the ontology
+				// notify the query engine to update the ontology
 				QuadStore ontology = createOntology();
 			}
 		} catch (InterruptedException | ExecutionException e) {
@@ -78,10 +78,8 @@ public class FetcherService extends AbstractService {
 	private Future<Boolean> fetchFile(String resourcePath, String resource, String savePath) {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
 
 		ResponseEntity<byte[]> response = restTemplate.exchange(resourcePath + resource, HttpMethod.GET, entity,

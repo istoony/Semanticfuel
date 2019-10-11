@@ -26,6 +26,18 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>rmlmapper</groupId>
+			<artifactId>rmlmapper</artifactId>
+			<version>4.5.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/lib/rmlmapper-4.5.0.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 			<exclusions>
@@ -95,13 +107,5 @@
 			<version>${junit.jupiter.version}</version>
 			<!-- <scope>test</scope> it is in use under the main src -->
 		</dependency>
-		<dependency>
-			<groupId>rmlmapper</groupId>
-			<artifactId>rmlmapper</artifactId>
-			<version>4.5.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/lib/rmlmapper-4.5.0.jar</systemPath>
-		</dependency>
-
 	</dependencies>
 </project>
