@@ -16,11 +16,18 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+/**
+ * @author MTODERO00
+ *
+ */
 public class CSVExtractor {
 	private CSVParser parser;
 	private BufferedReader reader;
 	private Map<String, BiFunction<String, String, Map<String, String>>> parsers;
 	private List<CSVItem> items;
+	private char delimiter;
+
+	private static final char DEFAULT_DELIMITER = ';';
 
 	public CSVExtractor() {
 		parsers = new HashMap<>();
@@ -32,6 +39,13 @@ public class CSVExtractor {
 	 */
 	public void clearParsers() {
 		parsers.clear();
+	}
+
+	/**
+	 * @param delimiter the CSV cell delimiter
+	 */
+	public void setDelimiter(char delimiter) {
+		this.delimiter = delimiter;
 	}
 
 	/**
@@ -140,7 +154,8 @@ public class CSVExtractor {
 	private boolean onStart(String file) {
 		try {
 			reader = new BufferedReader(new FileReader(file));
-			parser = CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader().parse(reader);
+			parser = CSVFormat.DEFAULT.withDelimiter(delimiter == '\u0000' ? DEFAULT_DELIMITER : delimiter)
+					.withFirstRecordAsHeader().parse(reader);
 		} catch (IOException e) {
 			System.out.println(e);
 			return false;

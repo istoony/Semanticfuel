@@ -15,6 +15,8 @@ public class CSVCreator {
 	private List<String> header;
 	private Set<String> fastHeader;
 	private List<CSVItem> rows;
+	private char delimiter;
+	private static final char DEFAULT_DELIMITER = ',';
 
 	private boolean largeFileMode;
 	private int nCheckpointRows;
@@ -37,6 +39,11 @@ public class CSVCreator {
 		return this;
 	}
 
+	public CSVCreator setDelimiter(char delimiter) {
+		this.delimiter = delimiter;
+		return this;
+	}
+
 	public CSVCreator setLargeFileMode(boolean largeFileMode) {
 		return setLargeFileMode(largeFileMode, DEFAULT_CHECKPOINT_ROWS);
 	}
@@ -50,7 +57,8 @@ public class CSVCreator {
 	public void buildCSV(String output) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(output));
 				CSVPrinter csvPrinter = new CSVPrinter(writer,
-						CSVFormat.DEFAULT.withDelimiter(';').withHeader(header.toArray(new String[0])));) {
+						CSVFormat.DEFAULT.withDelimiter(delimiter == '\u0000' ? DEFAULT_DELIMITER : delimiter)
+								.withHeader(header.toArray(new String[0])));) {
 			int rowCounterForFlush = 0;
 			for (CSVItem it : rows) {
 				List<String> record = new ArrayList<>();

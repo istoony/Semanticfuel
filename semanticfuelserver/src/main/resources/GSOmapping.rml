@@ -1,0 +1,169 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#>.
+@prefix rml: <http://semweb.mmlab.be/ns/rml#>.
+@prefix ql: <http://semweb.mmlab.be/ns/ql#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>.
+@prefix gso: <http://gas_station.example.com/data#>.
+
+<http://gas_station.example.com/LocationMapping>
+	rml:logicalSource [
+    	rml:source "anagrafica_impianti_attivi_2.csv";
+    	rml:referenceFormulation ql:CSV 
+  	];
+  	
+  	rr:subjectMap [
+    	rr:termType rr:BlankNode;
+    	rr:class gso:coordinate
+  	];
+
+  	rr:predicateObjectMap [
+    	rr:predicate wgs84_pos:lat;
+    	rr:objectMap [
+      		rml:reference "Latitudine"
+    	]
+  	];
+
+  	rr:predicateObjectMap [
+    	rr:predicate wgs84_pos:long;
+    	rr:objectMap [
+      		rml:reference "Longitudine"
+    	]
+  	].
+  	
+<http://gas_station.example.com/AddressMapping>
+	rml:logicalSource [
+    	rml:source "anagrafica_impianti_attivi_2.csv";
+    	rml:referenceFormulation ql:CSV 
+  	];
+  	
+  	rr:subjectMap [
+    	rr:termType rr:BlankNode;
+    	rr:class gso:address
+  	];
+
+  	rr:predicateObjectMap [
+    	rr:predicate gso:city;
+    	rr:objectMap [
+      		rml:reference "Comune"
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:address;
+    	rr:objectMap [
+      		rml:reference "Indirizzo"
+    	]
+  	];
+
+  	rr:predicateObjectMap [
+    	rr:predicate gso:prov;
+    	rr:objectMap [
+      		rml:reference "Provincia"
+    	]
+  	].
+  	
+<http://gas_station.example.com/PumpMapping>
+	rml:logicalSource [
+    	rml:source "prezzo_alle_8_2.csv";
+    	rml:referenceFormulation ql:CSV; 
+  	];
+  	
+  	rr:subjectMap [
+    	rr:termType rr:BlankNode;
+    	rr:class gso:fuel_pump
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:price;
+    	rr:objectMap [
+      		rml:reference "Prezzo";
+      		rr:datatype xsd:double;
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:last_updated;
+    	rr:objectMap [
+      		rml:reference "dtComu";
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:is_self;
+    	rr:objectMap [
+      		rml:reference "isSelf";
+      		rr:datatype xsd:boolean;
+    	]
+  	].
+
+<http://gas_station.example.com/GasStationMapping>
+	rml:logicalSource [
+    	rml:source "anagrafica_impianti_attivi_2.csv";
+    	rml:referenceFormulation ql:CSV 
+  	];
+  	
+  	rr:subjectMap [
+    	rr:template "http://gas_station.example.com/{idImpianto}";
+    	rr:class gso:gas_station 
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:flag;
+    	rr:objectMap [
+      		rml:reference "Bandiera";
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:owner;
+    	rr:objectMap [
+      		rml:reference "Gestore";
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:type;
+    	rr:objectMap [
+      		rml:reference "Tipo Impianto";
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:name;
+    	rr:objectMap [
+      		rml:reference "Nome Impianto";
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:has_location;
+    	rr:objectMap [
+    		rr:parentTriplesMap <http://gas_station.example.com/LocationMapping>;
+    		rr:joinCondition[
+    			rr:child "idImpianto";
+    			rr:parent "idImpianto";
+    		];
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:has_pump;
+    	rr:objectMap [
+    		rr:parentTriplesMap <http://gas_station.example.com/PumpMapping>;
+    		rr:joinCondition[
+    			rr:child "idImpianto";
+    			rr:parent "idImpianto";
+    		];
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:has_address;
+    	rr:objectMap [
+    		rr:parentTriplesMap <http://gas_station.example.com/AddressMapping>;
+    		rr:joinCondition[
+    			rr:child "idImpianto";
+    			rr:parent "idImpianto";
+    		];
+    	]
+  	].
