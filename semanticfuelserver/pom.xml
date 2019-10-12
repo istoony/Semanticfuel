@@ -30,6 +30,7 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.7</version>
 		</dependency>
+		<!--  
 		<dependency>
 			<groupId>rmlmapper</groupId>
 			<artifactId>rmlmapper</artifactId>
@@ -37,6 +38,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/lib/rmlmapper-4.5.0.jar</systemPath>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>

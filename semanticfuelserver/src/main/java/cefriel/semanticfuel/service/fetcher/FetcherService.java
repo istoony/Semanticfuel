@@ -1,18 +1,20 @@
 package cefriel.semanticfuel.service.fetcher;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import org.eclipse.rdf4j.rio.RDFFormat;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,27 +29,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.common.io.Files;
-
-import be.ugent.rml.Executor;
-import be.ugent.rml.Utils;
-import be.ugent.rml.functions.FunctionLoader;
-import be.ugent.rml.functions.lib.GrelProcessor;
-import be.ugent.rml.functions.lib.IDLabFunctions;
-import be.ugent.rml.records.RecordsFactory;
-import be.ugent.rml.store.QuadStore;
-import be.ugent.rml.store.RDF4JStore;
-import be.ugent.rml.term.Term;
 import cefriel.semanticfuel.service.AbstractService;
 import cefriel.semanticfuel.utils.csv.CSVCreator;
+import cefriel.semanticfuel.utils.csv.CSVExtractor;
 import cefriel.semanticfuel.utils.csv.CSVItem;
 
 @Service
 @EnableScheduling
 public class FetcherService extends AbstractService {
-	private final static String MISE_URL = "https://www.mise.gov.it/images/exportCSV";
-	private final static String SOURCE_PRICE = "prezzo_alle_8.csv";
-	private final static String SOURCE_LIST = "anagrafica_impianti_attivi.csv";
+	private final static String SOURCE_PRICE = "https://www.mise.gov.it/images/exportCSV/prezzo_alle_8.csv";
+	private final static String SOURCE_LIST = "https://www.mise.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv";
 
 	private final static String PATH_TO_SOURCES = "src" + File.separator + "main" + File.separator + "sources";
 	private final static String TARGET_PRICE = "preprocessed_prices.csv";
@@ -57,10 +48,12 @@ public class FetcherService extends AbstractService {
 	 * Fetch data from the two MISE's sources every day at 8:30 AM.
 	 */
 	@Scheduled(cron = "0 30 8 * * *")
+	// @Scheduled(fixedRate = 60000)
 	public void fetch() {
+		System.out.println("saving");
 		// async calls to download the two sources from MISE
-		Future<byte[]> stationList = fetchFile(MISE_URL, SOURCE_LIST);
-		Future<byte[]> stationPrices = fetchFile(MISE_URL, SOURCE_PRICE);
+		Future<byte[]> stationList = fetchFile(SOURCE_LIST);
+		Future<byte[]> stationPrices = fetchFile(SOURCE_PRICE);
 
 		byte[] stationListResp, stationPricesResp;
 		try {
@@ -73,10 +66,13 @@ public class FetcherService extends AbstractService {
 			return;
 		}
 
+		new File(PATH_TO_SOURCES).mkdirs();
+
 		// async calls to preprocess and save the two sources from MISE
-		Future<Boolean> listSaved = saveFile(PATH_TO_SOURCES + File.separator + TARGET_LIST, stationListResp, null);
+		Future<Boolean> listSaved = saveFile(PATH_TO_SOURCES + File.separator + TARGET_LIST, stationListResp,
+				this::preprocessListSource);
 		Future<Boolean> pricesSaved = saveFile(PATH_TO_SOURCES + File.separator + TARGET_PRICE, stationPricesResp,
-				null);
+				this::preprocessListPrices);
 
 		try {
 			// blocking calls
@@ -88,25 +84,25 @@ public class FetcherService extends AbstractService {
 			return;
 		}
 
+		System.out.println("done");
 	}
 
 	/**
 	 * Async method to download a given resource.
 	 * 
-	 * @param resourcePath the url to the resource
-	 * @param resource     the name of the resource to download
+	 * @param resourcePath the url of the resource
 	 * @return the buffer of byte rapresenting the content of the resource
 	 */
 	@Async
-	private Future<byte[]> fetchFile(String resourcePath, String resource) {
+	private Future<byte[]> fetchFile(String resourcePath) {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
 
-		ResponseEntity<byte[]> response = restTemplate.exchange(resourcePath + resource, HttpMethod.GET, entity,
-				byte[].class, "1");
+		ResponseEntity<byte[]> response = restTemplate.exchange(resourcePath, HttpMethod.GET, entity, byte[].class,
+				"1");
 
 		if (response.getStatusCode() == HttpStatus.OK)
 			return new AsyncResult<>(response.getBody());
@@ -117,8 +113,8 @@ public class FetcherService extends AbstractService {
 	private Future<Boolean> saveFile(String destinationFile, byte[] content,
 			Function<byte[], List<CSVItem>> preProcessingFunction) {
 		if (preProcessingFunction == null) {
-			try {
-				Files.write(content, Paths.get(destinationFile).toFile());
+			try (FileOutputStream fos = new FileOutputStream(Paths.get(destinationFile).toString())) {
+				fos.write(content);
 				return new AsyncResult<>(true);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -129,7 +125,7 @@ public class FetcherService extends AbstractService {
 		List<CSVItem> ppItems = preProcessingFunction.apply(content);
 
 		try {
-			CSVCreator writer = new CSVCreator().setDelimiter(',').setLargeFileMode(true).setRows(ppItems)
+			CSVCreator writer = new CSVCreator().setDelimiter(';').setLargeFileMode(true).setRows(ppItems)
 					.setHeader(ppItems.get(0).getTemplate());
 			writer.buildCSV(destinationFile);
 			return new AsyncResult<>(true);
@@ -139,41 +135,83 @@ public class FetcherService extends AbstractService {
 		}
 	}
 
-	private QuadStore createOntology() {
-		String mOptionValue = "";
+	private List<CSVItem> preprocessListSource(byte[] source) {
+		CSVExtractor reader = new CSVExtractor();
 
-		RDF4JStore rmlStore = Utils.readTurtle(ClassLoader.class.getResourceAsStream(mOptionValue), RDFFormat.TURTLE);
-		RecordsFactory factory = new RecordsFactory(System.getProperty("user.dir"));
+		reader.setDelimiter(';').skipFirstNLines(1);
+		reader.addParamParser(Ontology.SourceList.STATION_NAME, this::parseCommas);
+		reader.addParamParser(Ontology.SourceList.STATION_OWNER, this::parseCommas);
+		reader.addParamParser(Ontology.SourceList.STATION_TYPE, this::parseCommas);
+		reader.addParamParser(Ontology.SourceList.StationAddress.STATION_ADDRESS, this::parseCommas);
 
-		String outputFormat = "turtle";
-		QuadStore outputStore = new RDF4JStore();
-
-		Map<String, Class> libraryMap = new HashMap<>();
-		libraryMap.put("GrelFunctions", GrelProcessor.class);
-		libraryMap.put("IDLabFunctions", IDLabFunctions.class);
-		FunctionLoader functionLoader = new FunctionLoader(null, null, libraryMap);
-
-		// We have to get the InputStreams of the RML documents again,
-		// because we can only use an InputStream once.
-		Executor executor;
 		try {
-			executor = new Executor(rmlStore, factory, functionLoader, outputStore,
-					Utils.getBaseDirectiveTurtle(ClassLoader.class.getResourceAsStream(mOptionValue)));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		List<Term> triplesMaps = new ArrayList<>();
-		QuadStore result;
-		try {
-			result = executor.execute(triplesMaps, false, null);
-			result.setNamespaces(rmlStore.getNamespaces());
+			reader.parse(new InputStreamReader(new ByteArrayInputStream(source)), true);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
 
-		return result;
+		return reader.getItems();
 	}
+
+	private List<CSVItem> preprocessListPrices(byte[] source) {
+		CSVExtractor reader = new CSVExtractor();
+
+		reader.setDelimiter(';').skipFirstNLines(1);
+		reader.addParamParser(Ontology.SourcePrices.StationPump.PUMP_UPDATE, this::parseDateTime);
+
+		try {
+			reader.parse(new InputStreamReader(new ByteArrayInputStream(source)), true);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return reader.getItems();
+	}
+
+	private String parseCommas(String source) {
+		return source.replaceAll(",", " - ");
+	}
+
+	private String parseDateTime(String source) {
+		DateFormat currentDF = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		DateFormat targetDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+		try {
+			return targetDF.format(currentDF.parse(source));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * private QuadStore createOntology() { String mOptionValue = "";
+	 * 
+	 * RDF4JStore rmlStore =
+	 * Utils.readTurtle(ClassLoader.class.getResourceAsStream(mOptionValue),
+	 * RDFFormat.TURTLE); RecordsFactory factory = new
+	 * RecordsFactory(System.getProperty("user.dir"));
+	 * 
+	 * String outputFormat = "turtle"; QuadStore outputStore = new RDF4JStore();
+	 * 
+	 * Map<String, Class> libraryMap = new HashMap<>();
+	 * libraryMap.put("GrelFunctions", GrelProcessor.class);
+	 * libraryMap.put("IDLabFunctions", IDLabFunctions.class); FunctionLoader
+	 * functionLoader = new FunctionLoader(null, null, libraryMap);
+	 * 
+	 * // We have to get the InputStreams of the RML documents again, // because we
+	 * can only use an InputStream once. Executor executor; try { executor = new
+	 * Executor(rmlStore, factory, functionLoader, outputStore,
+	 * Utils.getBaseDirectiveTurtle(ClassLoader.class.getResourceAsStream(mOptionValue)));
+	 * } catch (Exception e) { e.printStackTrace(); return null; }
+	 * 
+	 * List<Term> triplesMaps = new ArrayList<>(); QuadStore result; try { result =
+	 * executor.execute(triplesMaps, false, null);
+	 * result.setNamespaces(rmlStore.getNamespaces()); } catch (IOException e) {
+	 * e.printStackTrace(); return null; }
+	 * 
+	 * return result; }
+	 **/
 }

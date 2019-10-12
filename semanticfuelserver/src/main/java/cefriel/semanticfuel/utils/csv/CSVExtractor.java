@@ -3,6 +3,7 @@ package cefriel.semanticfuel.utils.csv;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,16 +17,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-/**
- * @author MTODERO00
- *
- */
 public class CSVExtractor {
 	private CSVParser parser;
 	private BufferedReader reader;
 	private Map<String, BiFunction<String, String, Map<String, String>>> parsers;
 	private List<CSVItem> items;
 	private char delimiter;
+	private int lineToSkip;
 
 	private static final char DEFAULT_DELIMITER = ';';
 
@@ -44,8 +42,14 @@ public class CSVExtractor {
 	/**
 	 * @param delimiter the CSV cell delimiter
 	 */
-	public void setDelimiter(char delimiter) {
+	public CSVExtractor setDelimiter(char delimiter) {
 		this.delimiter = delimiter;
+		return this;
+	}
+
+	public CSVExtractor skipFirstNLines(int nlines) {
+		this.lineToSkip = nlines;
+		return this;
 	}
 
 	/**
@@ -56,9 +60,18 @@ public class CSVExtractor {
 	 * 
 	 * @param file path to the target
 	 * @return true if the parsing run without errors
+	 * @throws IOException
 	 */
-	public boolean parse(String file) {
+	public boolean parse(String file) throws IOException {
 		return parse(file, false);
+	}
+
+	public boolean parse(Reader file) throws IOException {
+		return parse(file, false);
+	}
+
+	public boolean parse(String file, boolean parseAll) throws IOException {
+		return parse(new FileReader(file), parseAll);
 	}
 
 	/**
@@ -69,10 +82,10 @@ public class CSVExtractor {
 	 * @param parseAll if false, extract just the columns specified through parsers,
 	 *                 otherwise extract all the columns
 	 * @return true if the parsing run without errors
+	 * @throws IOException
 	 */
-	public boolean parse(String file, boolean parseAll) {
-		if (!onStart(file))
-			return false;
+	public boolean parse(Reader file, boolean parseAll) throws IOException {
+		onStart(file);
 
 		items.clear();
 
@@ -151,17 +164,13 @@ public class CSVExtractor {
 		return new ArrayList<>(items);
 	}
 
-	private boolean onStart(String file) {
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			parser = CSVFormat.DEFAULT.withDelimiter(delimiter == '\u0000' ? DEFAULT_DELIMITER : delimiter)
-					.withFirstRecordAsHeader().parse(reader);
-		} catch (IOException e) {
-			System.out.println(e);
-			return false;
-		}
+	private void onStart(Reader file) throws IOException {
+		reader = new BufferedReader(file);
+		for (int i = 0; i < lineToSkip; i++)
+			reader.readLine();
 
-		return true;
+		parser = CSVFormat.DEFAULT.withDelimiter(delimiter == '\u0000' ? DEFAULT_DELIMITER : delimiter)
+				.withFirstRecordAsHeader().withQuote(null).parse(reader);
 	}
 
 	private boolean onEnd() {
@@ -180,45 +189,5 @@ public class CSVExtractor {
 
 	private String getHeader(int cell) {
 		return parser.getHeaderNames().get(cell);
-	}
-
-	public static void main(String[] args) {
-		CSVExtractor csv = new CSVExtractor();
-
-		BiFunction<String, String, Map<String, String>> parser = ((attribute, input) -> {
-			Map<String, String> params = new HashMap<>();
-
-			final String medium = "Medium";
-			final String high = "High";
-			final String low = "Low";
-
-			switch (input) {
-			case medium:
-				params.put(attribute, "3");
-				break;
-			case high:
-				params.put(attribute, "4");
-				break;
-			case low:
-				params.put(attribute, "2");
-				break;
-			default:
-				params.put(attribute, "0");
-			}
-
-			return params;
-		});
-		csv.addParamParser("Availability", parser);
-		csv.addParamParser("Privacy", parser);
-		csv.addParamParser("integrity", parser);
-		csv.addParamParser("Name");
-		csv.addParamParser("Id");
-
-		System.out.println(csv.parse("Input_Example.csv", true));
-
-		System.out.println(csv.getItems().size());
-
-		for (CSVItem i : csv.getItems())
-			System.out.println(i.toString());
 	}
 }

@@ -85,6 +85,7 @@
     	rr:predicate gso:last_updated;
     	rr:objectMap [
       		rml:reference "dtComu";
+      		rr::datatype xsd:dateTime
     	]
   	];
   	
