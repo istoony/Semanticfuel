@@ -186,8 +186,8 @@ public class CSVExtractor {
 	private String parseParam(String cell) {
 		return cell == null ? "" : cell;
 	}
-
+	//TODO: QUESTA DA CAMBIARE
 	private String getHeader(int cell) {
-		return parser.getHeaderNames().get(cell);
+		return parser.getHeaderMap().get(cell).toString(); 
 	}
 }
