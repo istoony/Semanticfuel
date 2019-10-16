@@ -31,7 +31,7 @@ public class OpenStreetDirectionDao extends AbstractService {
 				.get("features")).get(0)).get("geometry");
 
 		List<Point> points = ((List<List<Double>>) geometry.get("coordinates")).stream()
-				.map(x -> new Point(x.get(0), x.get(1))).collect(Collectors.toList());
+				.map(x -> new Point(x.get(1), x.get(0))).collect(Collectors.toList());
 		return points;
 	}
 
