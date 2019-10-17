@@ -4,6 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>.
 @prefix gso: <http://gas_station.example.com/data#>.
+@prefix geo: <http://www.opengis.net/ont/geosparql#>.
 
 <http://gas_station.example.com/LocationMapping>
 	rml:logicalSource [
