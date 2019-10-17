@@ -7,7 +7,7 @@
 
 <http://gas_station.example.com/LocationMapping>
 	rml:logicalSource [
-    	rml:source "src/main/sources/preprocessed_list.csv";
+    	rml:source "sources/anagrafica_impianti_attivi_2.csv";
     	rml:referenceFormulation ql:CSV 
   	];
   	
@@ -32,7 +32,7 @@
   	
 <http://gas_station.example.com/AddressMapping>
 	rml:logicalSource [
-    	rml:source "src/main/sources/preprocessed_list.csv";
+    	rml:source "sources/anagrafica_impianti_attivi_2.csv";
     	rml:referenceFormulation ql:CSV 
   	];
   	
@@ -64,7 +64,7 @@
   	
 <http://gas_station.example.com/PumpMapping>
 	rml:logicalSource [
-    	rml:source "src/main/sources/preprocessed_prices.csv";
+    	rml:source "sources/prezzo_alle_8_2.csv";
     	rml:referenceFormulation ql:CSV; 
   	];
   	
@@ -99,7 +99,7 @@
 
 <http://gas_station.example.com/GasStationMapping>
 	rml:logicalSource [
-    	rml:source "src/main/sources/preprocessed_list.csv";
+    	rml:source "sources/anagrafica_impianti_attivi_2.csv";
     	rml:referenceFormulation ql:CSV 
   	];
   	

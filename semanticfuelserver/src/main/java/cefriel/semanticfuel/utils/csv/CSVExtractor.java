@@ -101,12 +101,12 @@ public class CSVExtractor {
 				if (columnName == null)
 					continue;
 
-				if (parseAll || parsers.containsKey(columnName.toLowerCase())) {
-					BiFunction<String, String, Map<String, String>> f = parsers.get(columnName.toLowerCase());
+				if (parseAll || parsers.containsKey(columnName)) {
+					BiFunction<String, String, Map<String, String>> f = parsers.get(columnName);
 					if (f == null)
-						item.addParam(columnName.toLowerCase(), parseParam(value));
+						item.addParam(columnName, parseParam(value));
 					else {
-						Map<String, String> params = f.apply(columnName.toLowerCase(), parseParam(value));
+						Map<String, String> params = f.apply(columnName, parseParam(value));
 						for (Entry<String, String> e : params.entrySet())
 							item.addParam(e.getKey(), e.getValue());
 					}
@@ -129,7 +129,7 @@ public class CSVExtractor {
 	 *               representing a new attribute-value cell relation
 	 */
 	public void addParamParser(String param, BiFunction<String, String, Map<String, String>> parser) {
-		parsers.put(param.toLowerCase(), parser);
+		parsers.put(param, parser);
 	}
 
 	/**
@@ -186,8 +186,8 @@ public class CSVExtractor {
 	private String parseParam(String cell) {
 		return cell == null ? "" : cell;
 	}
-	//TODO: QUESTA DA CAMBIARE
+
 	private String getHeader(int cell) {
-		return parser.getHeaderMap().get(cell).toString(); 
+		return parser.getHeaderNames().get(cell);
 	}
 }

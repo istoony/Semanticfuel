@@ -47,8 +47,8 @@ public class FetcherService extends AbstractService {
 	/**
 	 * Fetch data from the two MISE's sources every day at 8:30 AM.
 	 */
-	@Scheduled(cron = "0 30 8 * * *")
-	// @Scheduled(fixedRate = 60000)
+	// @Scheduled(cron = "0 30 8 * * *")
+	@Scheduled(fixedRate = 60000)
 	public void fetch() {
 		System.out.println("saving");
 		// async calls to download the two sources from MISE
@@ -91,7 +91,7 @@ public class FetcherService extends AbstractService {
 	 * Async method to download a given resource.
 	 * 
 	 * @param resourcePath the url of the resource
-	 * @return the buffer of byte rapresenting the content of the resource
+	 * @return the buffer of byte representing the content of the resource
 	 */
 	@Async
 	private Future<byte[]> fetchFile(String resourcePath) {
@@ -125,7 +125,7 @@ public class FetcherService extends AbstractService {
 		List<CSVItem> ppItems = preProcessingFunction.apply(content);
 
 		try {
-			CSVCreator writer = new CSVCreator().setDelimiter(';').setLargeFileMode(true).setRows(ppItems)
+			CSVCreator writer = new CSVCreator().setDelimiter(',').setLargeFileMode(true).setRows(ppItems)
 					.setHeader(ppItems.get(0).getTemplate());
 			writer.buildCSV(destinationFile);
 			return new AsyncResult<>(true);
@@ -185,33 +185,4 @@ public class FetcherService extends AbstractService {
 			return null;
 		}
 	}
-
-	/**
-	 * private QuadStore createOntology() { String mOptionValue = "";
-	 * 
-	 * RDF4JStore rmlStore =
-	 * Utils.readTurtle(ClassLoader.class.getResourceAsStream(mOptionValue),
-	 * RDFFormat.TURTLE); RecordsFactory factory = new
-	 * RecordsFactory(System.getProperty("user.dir"));
-	 * 
-	 * String outputFormat = "turtle"; QuadStore outputStore = new RDF4JStore();
-	 * 
-	 * Map<String, Class> libraryMap = new HashMap<>();
-	 * libraryMap.put("GrelFunctions", GrelProcessor.class);
-	 * libraryMap.put("IDLabFunctions", IDLabFunctions.class); FunctionLoader
-	 * functionLoader = new FunctionLoader(null, null, libraryMap);
-	 * 
-	 * // We have to get the InputStreams of the RML documents again, // because we
-	 * can only use an InputStream once. Executor executor; try { executor = new
-	 * Executor(rmlStore, factory, functionLoader, outputStore,
-	 * Utils.getBaseDirectiveTurtle(ClassLoader.class.getResourceAsStream(mOptionValue)));
-	 * } catch (Exception e) { e.printStackTrace(); return null; }
-	 * 
-	 * List<Term> triplesMaps = new ArrayList<>(); QuadStore result; try { result =
-	 * executor.execute(triplesMaps, false, null);
-	 * result.setNamespaces(rmlStore.getNamespaces()); } catch (IOException e) {
-	 * e.printStackTrace(); return null; }
-	 * 
-	 * return result; }
-	 **/
 }
