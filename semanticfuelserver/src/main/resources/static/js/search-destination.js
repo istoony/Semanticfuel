@@ -1,6 +1,17 @@
 var START;
 var END;
+var FUEL;
 var STEP = 0;
+var listOfFuel = [ 'Benzina', 'Gasolio', 'Metano', 'GPL', 'Excellium Diesel',
+		'Blue Super', 'Blue Diesel', 'Gasolio Alpino', 'Gasolio Oro Diesel',
+		'Gasolio artico', 'Benzina WR 100', 'Gasolio Premium', 'Hi-Q Diesel',
+		'HiQ Perform+', 'Gasolio Speciale', 'Gasolio Ecoplus',
+		'Benzina Plus 98', 'Gasolio Gelo', 'L-GNC', 'GNL', 'DieselMax',
+		'Benzina speciale', 'Diesel e+10', 'F101', 'GP DIESEL',
+		'Gasolio Energy D', 'Benzina Energy 98 ottani', 'Supreme Diesel',
+		'E-DIESEL', 'Benzina Shell V Power', 'Diesel Shell V Power',
+		'Magic Diesel', 'Blu Diesel Alpino', 'S-Diesel', 'R100', 'V-Power',
+		'V-Power Diesel', 'Benzina 100 ottani' ];
 
 $(document).ready(function() {
 
@@ -11,6 +22,12 @@ $(document).ready(function() {
 		event.preventDefault();
 		fire_ajax_submit();
 	});
+
+	$("#fuel-form").submit(function(event) {
+		// stop submit the form, we will post it manually.
+		event.preventDefault();
+	});
+
 });
 
 function fire_ajax_submit() {
@@ -87,24 +104,48 @@ function printPlaceTable(data) {
 }
 
 function printFuelSelect() {
+	var optionList = "<option value=''>Seleziona</option>";
+	listOfFuel.forEach(function(el) {
+		optionList += "<option value='" + el + "'>" + el + "</option>";
+	});
+	$("#combobox").html(optionList);
+
 	$("#div-fuel").removeClass('display-none');
 	$("#div-fuel").addClass('display-block');
-	
-	
+
+	$("#combobox").change(function() {
+		FUEL = $("#combobox").val();
+		console.log(FUEL);
+	});
+
+	$("#combobox-submit").on("click", function() {
+		printLoadingPage();
+		$("#div-fuel").addClass('display-none');
+		$("#div-fuel").removeClass('display-block');
+	});
+
 }
 
 function printLoadingPage() {
-	var result = '<div class="row">'
+	var result = '<div class="row"><div class="col-md-6" style="padding-right: 35px;"><div class="row">'
 			+ '<div class="col-12"><h3>Città di partenza</h3></div>'
-			+ '<div class="col-12">' + placeTableUtil([START]) + '</div>'
+			+ '<div class="col-12">'
+			+ placeTableUtil([ START ])
+			+ '</div>'
+			+ '</div></div><div class="col-md-6" style="padding-left: 35px;"><div class="row">'
 			+ '<div class="col-12"><h3>Città di arrivo</h3></div>'
-			+ '<div class="col-12">' + placeTableUtil([END]) + '</div>'
-			+ '</div>';
+			+ '<div class="col-12">'
+			+ placeTableUtil([ END ])
+			+ '</div>'
+			+ '</div></div>'
+			+ '<div class="col-md-12"><h3><b>Carburante:</b>'
+			+ FUEL + '</h3></div></div>';
 	$('#search-div').html(result);
-	
+
 	var toSend = {};
 	toSend['start'] = START;
 	toSend['end'] = END;
+	toSend['fuel'] = FUEL;
 	console.log(JSON.stringify(toSend));
 
 	$.ajax({
@@ -112,7 +153,7 @@ function printLoadingPage() {
 		contentType : "application/json",
 		url : "/api/direction",
 		dataType : 'json',
-		data: JSON.stringify(toSend),
+		data : JSON.stringify(toSend),
 		cache : false,
 		timeout : 600000,
 		success : printGasStationResult,
@@ -127,6 +168,6 @@ function printLoadingPage() {
 	});
 }
 
-function printGasStationResult(data){
+function printGasStationResult(data) {
 	alert(data.responseText);
 }

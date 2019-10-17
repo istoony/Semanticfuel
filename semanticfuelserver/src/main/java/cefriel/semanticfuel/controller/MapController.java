@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import cefriel.semanticfuel.service.map.OpenStreetDirectionService;
 import cefriel.semanticfuel.service.map.OpenStreetPlacesService;
 import model.DirectionRequest;
+import model.DirectionResponse;
 import model.Place;
 
 @RestController
@@ -31,9 +32,8 @@ public class MapController extends AbstractController {
 	}
 
 	@PostMapping("direction")
-	public String direction(@RequestBody DirectionRequest request) {
-		System.out.print("Request: " + request);
-		return "OK";
+	public DirectionResponse direction(@RequestBody DirectionRequest request) {
+		return openStreetDirectionService.computeResponse(request);
 	}
 
 }

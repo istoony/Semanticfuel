@@ -44,6 +44,6 @@ public class OpenStreetDirectionDao extends AbstractService {
 	}
 
 	private String printPoint(Point start) {
-		return start.getLatitude() + "," + start.getLongitude();
+		return start.getLongitude() + "," + start.getLatitude();
 	}
 }

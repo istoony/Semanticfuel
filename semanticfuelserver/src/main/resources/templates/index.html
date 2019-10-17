@@ -40,18 +40,23 @@
 				</form>
 			</div>
 			<div class="col-12 display-none" id="div-fuel">
-				<label>Seleziona la tipologia di prodotto desiderata:</label> <select
-					id="combobox">
-					<option value="">Seleziona</option>
-					<option value=Benzina>Benzina</option>
-					<option value="Gasolio">Gasolio</option>
-					<option value="Metano">Metano</option>
-					<option value="GPL">GPL</option>
-				</select>
+				<form class="form-horizontal" id="fuel-form">
+					<div class="form-group form-group-lg">
+						<label class="col-sm-3 control-label">Seleziona carburante:</label>
+						<div class="col-sm-9">
+							<select class="form-control" id="combobox"></select>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-7 col-sm-5">
+							<button type="submit" id="combobox-submit"
+								class="btn btn-primary btn-block">Search</button>
+						</div>
+					</div>
+				</form>
 			</div>
 			<div class="col-12" id="feedback"></div>
 		</div>
-
 	</div>
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
