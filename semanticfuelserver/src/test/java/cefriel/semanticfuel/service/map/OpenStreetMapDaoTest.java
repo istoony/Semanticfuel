@@ -23,7 +23,7 @@ public class OpenStreetMapDaoTest extends AbstractTest {
 	@Autowired
 	private OpenStreetPlacesDao openStreetPlacesDao;
 
-	@Test
+	//@Test
 	public void getRequestTest() {
 		Point start = new Point(8.681495,49.41461);
 		Point end = new Point(9.687872,39.420318);

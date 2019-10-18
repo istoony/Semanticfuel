@@ -25,7 +25,7 @@ public class QueryEngineServiceTest extends AbstractTest {
 	@Autowired
 	private OpenStreetDirectionService openStreetDirectionService;
 
-	@Test
+	//@Test
 	public void updateOntology() {
 		List<Place> startList = openStreetPlacesService.getListOfPlaces("Via Manzoni, Lecco");
 		LOG.debug("Start List = {}", startList);
