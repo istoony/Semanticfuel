@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import org.jline.utils.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,9 +45,9 @@ public class FetcherService extends AbstractService {
 	private final static String PATH_TO_SOURCES = "src" + File.separator + "main" + File.separator + "sources";
 	private final static String TARGET_PRICE = "preprocessed_prices.csv";
 	private final static String TARGET_LIST = "preprocessed_list.csv";
-	
+
 	@Autowired
-	private CSVExtractor reader;
+	private ModelKeeperService modelManager;
 
 	/**
 	 * Fetch data from the two MISE's sources every day at 8:30 AM.
@@ -54,7 +55,9 @@ public class FetcherService extends AbstractService {
 //	@Scheduled(cron = "0 30 8 * * *")
 	@Scheduled(fixedRate = 60000)
 	public void fetch() {
-		System.out.println("saving");
+		Log.info("Fetching ontology updates...");
+		long fetchingStart = System.currentTimeMillis();
+
 		// async calls to download the two sources from MISE
 		Future<byte[]> stationList = fetchFile(SOURCE_LIST);
 		Future<byte[]> stationPrices = fetchFile(SOURCE_PRICE);
@@ -88,7 +91,10 @@ public class FetcherService extends AbstractService {
 			return;
 		}
 
-		System.out.println("done");
+		Log.info("Updates fetched in " + ((System.currentTimeMillis() - fetchingStart) / 1000) + " seconds");
+
+		// update the ontology in memory
+		modelManager.updateOntology(PATH_TO_SOURCES);
 	}
 
 	/**
@@ -160,6 +166,7 @@ public class FetcherService extends AbstractService {
 	}
 
 	private List<CSVItem> preprocessListPrices(byte[] source) {
+		CSVExtractor reader = new CSVExtractor();
 
 		reader.setDelimiter(';').skipFirstNLines(1);
 		reader.addParamParser(Ontology.SourcePrices.StationPump.PUMP_UPDATE, this::parseDateTime);

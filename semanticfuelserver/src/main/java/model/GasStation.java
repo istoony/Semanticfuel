@@ -3,6 +3,8 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class GasStation {
 	private List<FuelPump> pumps;
 	private Point coordinate;
@@ -10,6 +12,7 @@ public class GasStation {
 	private String name;
 	private String owner;
 	private String flag;
+	private String type;
 
 	private GasStation(StationBuilder builder) {
 		this.pumps = builder.pumps;
@@ -18,14 +21,15 @@ public class GasStation {
 		this.name = builder.name;
 		this.owner = builder.owner;
 		this.flag = builder.flag;
+		this.type = builder.type;
 	}
 
 	public List<FuelPump> getPumps() {
 		return pumps;
 	}
 
-	public void setPumps(List<FuelPump> pumps) {
-		this.pumps = pumps;
+	public void addPumps(List<FuelPump> pumps) {
+		this.pumps.addAll(pumps);
 	}
 
 	public Point getCoordinate() {
@@ -52,6 +56,14 @@ public class GasStation {
 		this.name = name;
 	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
+	}
+
 	public String getOwner() {
 		return owner;
 	}
@@ -68,6 +80,11 @@ public class GasStation {
 		this.flag = flag;
 	}
 
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(name).append(coordinate).toHashCode();
+	}
+
 	public static class StationBuilder {
 		private List<FuelPump> pumps;
 		private Point coordinate;
@@ -75,9 +92,14 @@ public class GasStation {
 		private String name;
 		private String owner;
 		private String flag;
+		private String type;
 
 		public StationBuilder() {
 			pumps = new ArrayList<>();
+		}
+
+		public GasStation build() {
+			return new GasStation(this);
 		}
 
 		public StationBuilder addPumps(List<FuelPump> pumps) {
@@ -112,6 +134,11 @@ public class GasStation {
 
 		public StationBuilder setFlag(String flag) {
 			this.flag = flag;
+			return this;
+		}
+
+		public StationBuilder setType(String type) {
+			this.type = type;
 			return this;
 		}
 	}

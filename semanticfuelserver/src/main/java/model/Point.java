@@ -1,5 +1,7 @@
 package model;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class Point {
 
 	private Double latitude;
@@ -30,5 +32,10 @@ public class Point {
 	@Override
 	public String toString() {
 		return "Point [latitude=" + latitude + ", longitude=" + longitude + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(latitude).append(longitude).toHashCode();
 	}
 }
