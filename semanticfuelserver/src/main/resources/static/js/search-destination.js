@@ -169,5 +169,52 @@ function printLoadingPage() {
 }
 
 function printGasStationResult(data) {
-	alert(data.responseText);
+
+	var mediaLat = (START['coordinates']['latitude'] + END['coordinates']['latitude']) / 2;
+	var mediaLong = (START['coordinates']['longitude'] + END['coordinates']['longitude']) / 2;
+
+	document.addEventListener("DOMContentLoaded", function() {
+		// The DOMContentLoaded event fires when the page is ready (like
+		// $(document).ready() in jQuery)
+		var map = createMap('map', -21.208312, 46.262851, 6);
+		// map is the id of our div element and the other options are
+		// lattitude, longitude and zoom
+	});
+
+	var map = createMap('map', mediaLat, mediaLong, 8);
+
+	var latlngs = [];
+
+	var pathCoordinates = data['pathCoordinates']
+	var i;
+	for (i = 0; i < pathCoordinates.length; i++) {
+		latlngs.push([ pathCoordinates[i]['latitude'],
+				pathCoordinates[i]['longitude'] ]);
+	}
+
+	var polyline = L.polyline(latlngs, {
+		color : 'red'
+	}).addTo(map);
+	// zoom the map to the polyline
+	map.fitBounds(polyline.getBounds());
+
+	function createMap(elemId, centerLat, centerLng, zoom) {
+		var map = new L.Map(elemId);
+
+		// Data provider
+		var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		var osmAttrib = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+
+		// Layer
+		var osmLayer = new L.TileLayer(osmUrl, {
+			minZoom : 4,
+			maxZoom : 20,
+			attribution : osmAttrib
+		});
+
+		// Map
+		map.setView(new L.LatLng(centerLat, centerLng), zoom);
+		map.addLayer(osmLayer);
+		return map;
+	}
 }

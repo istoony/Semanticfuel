@@ -16,8 +16,12 @@ import java.util.function.Function;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.stereotype.Service;
 
-public class CSVExtractor {
+import cefriel.semanticfuel.service.AbstractService;
+
+@Service
+public class CSVExtractor extends AbstractService {
 	private CSVParser parser;
 	private BufferedReader reader;
 	private Map<String, BiFunction<String, String, Map<String, String>>> parsers;

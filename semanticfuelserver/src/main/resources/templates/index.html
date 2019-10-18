@@ -5,6 +5,18 @@
 <link rel="stylesheet" type="text/css"
 	href="webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/leaflet.css" />
+    <style>
+        html, body {
+            text-align: center;
+        }
+        #map {
+            height: 500px;
+            width: 700px;
+            max-width: 100%;
+            margin: auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -42,7 +54,8 @@
 			<div class="col-12 display-none" id="div-fuel">
 				<form class="form-horizontal" id="fuel-form">
 					<div class="form-group form-group-lg">
-						<label class="col-sm-3 control-label">Seleziona carburante:</label>
+						<label class="col-sm-3 control-label">Seleziona
+							carburante:</label>
 						<div class="col-sm-9">
 							<select class="form-control" id="combobox"></select>
 						</div>
@@ -56,11 +69,15 @@
 				</form>
 			</div>
 			<div class="col-12" id="feedback"></div>
+			<div class="col-12" id="print-map">
+				<div id="map"></div>
+			</div>
 		</div>
 	</div>
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
 	<script type="text/javascript" src="js/search-destination.js"></script>
+	<script type="text/javascript" src="js/leaflet.js"></script>
 </body>
 
 </html>
