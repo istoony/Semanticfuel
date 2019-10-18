@@ -22,7 +22,6 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import be.ugent.rml.Executor;
@@ -43,7 +42,7 @@ public class QueryEngineService extends AbstractService {
 	}
 
 	public void updateOntology() throws IOException, SpatialIndexException {
-		boolean skip = false;
+		boolean skip = true;
 
 		long start = 0;
 
@@ -83,11 +82,6 @@ public class QueryEngineService extends AbstractService {
 
 		System.out.println("finito " + ((System.currentTimeMillis() - start) / 1000));
 
-		StmtIterator si = model.listStatements();
-		while (si.hasNext()) {
-			// System.out.println(si.next());
-		}
-
 		// Create a new query
 		String queryString = "PREFIX gso:  <http://gas_station.example.com/data#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
 				+ "SELECT ?station " + "WHERE {" + "      ?station rdf:type gso:gas_station}";
@@ -115,11 +109,38 @@ public class QueryEngineService extends AbstractService {
 
 		GeoSPARQLConfig.setupMemoryIndex();
 		Dataset spatialDataset = SpatialIndex.wrapModel(model);
+
 		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
 				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
-				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> " + " SELECT ?station"
-				+ " WHERE{?station gso:has_geometry ?feat . ?feat geo:hasGeometry ?geom . ? geo:sfContains ?geom . "
-				+ " ?station gso:has_pump ?pump . ?pump gso:fuel ?}";
+				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
+				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " + " SELECT ?station ?name"
+				+ " WHERE{ ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name }";
+
+		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
+				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
+				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " + " SELECT ?station ?name ?wkt"
+				+ " WHERE{?station geo:hasGeometry ?geom . " + " ?geom geo:asWKT ?wkt . "
+				+ " ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name }";
+
+		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
+				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
+				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " + " SELECT ?station ?name"
+				+ " WHERE{?station geo:hasGeometry ?geom . " + " ?geom geo:asWKT ?wkt . "
+				+ " ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name . "
+				+ " ?station gso:has_address ?address . ?address gso:city 'FIRENZE' . FILTER(geof:sfWithin(?wkt, '''<http://www.opengis.net/def/crs/OGC/1.3/CRS84>"
+				+ "            Polygon ((47 5, 47 16, 35 23, 36 7, 47 5))" + "        '''^^geo:wktLiteral))" + "}";
+
+		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
+				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
+				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " + " SELECT ?station ?name ?city"
+				+ " WHERE{?station geo:hasGeometry ?geom . " + " ?geom geo:asWKT ?wkt . "
+				+ " ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name . "
+				+ " ?station gso:has_address ?address . ?address gso:city ?city . FILTER(geof:sfWithin(?wkt, '''<http://www.opengis.net/def/crs/OGC/1.3/CRS84>"
+				+ "            Polygon ((45.381781 8.941661, 45.590982 8.990870, 45.549157 9.355141, 45.367502 9.382289, 45.381781 8.941661))"
+				+ "        '''^^geo:wktLiteral))" + "}";
 
 		System.out.println("yoyo");
 
