@@ -14,6 +14,7 @@ import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.geosparql.spatial.SpatialIndex;
 import org.apache.jena.geosparql.spatial.SpatialIndexException;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -131,22 +132,29 @@ public class QueryEngineService extends AbstractService {
 				+ " ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name . "
 				+ " ?station gso:has_address ?address . ?address gso:city 'FIRENZE' . FILTER(geof:sfWithin(?wkt, '''<http://www.opengis.net/def/crs/OGC/1.3/CRS84>"
 				+ "            Polygon ((47 5, 47 16, 35 23, 36 7, 47 5))" + "        '''^^geo:wktLiteral))" + "}";
+// Polygon ((45.381781 8.941661, 45.590982 8.990870, 45.549157 9.355141, 45.367502 9.382289, 45.381781 8.941661))"
 
-		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
+		ParameterizedSparqlString paramString = new ParameterizedSparqlString();
+		paramString.setCommandText("PREFIX gso:  <http://gas_station.example.com/data#> "
 				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
 				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
 				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " + " SELECT ?station ?name ?city"
 				+ " WHERE{?station geo:hasGeometry ?geom . " + " ?geom geo:asWKT ?wkt . "
-				+ " ?station gso:has_pump ?pump . ?pump gso:fuel 'Benzina' . ?station gso:name ?name . "
-				+ " ?station gso:has_address ?address . ?address gso:city ?city . FILTER(geof:sfWithin(?wkt, '''<http://www.opengis.net/def/crs/OGC/1.3/CRS84>"
-				+ "            Polygon ((45.381781 8.941661, 45.590982 8.990870, 45.549157 9.355141, 45.367502 9.382289, 45.381781 8.941661))"
-				+ "        '''^^geo:wktLiteral))" + "}";
+				+ " ?station gso:has_pump ?pump . ?pump gso:fuel ?fuelParam . ?station gso:name ?name . "
+				+ " ?station gso:has_address ?address . ?address gso:city ?city ."
+				+ " FILTER(geof:sfWithin(?wkt, ?poliParam" + "^^geo:wktLiteral))}");
+		paramString.setLiteral("fuelParam", "Benzina");
 
-		System.out.println("yoyo");
+		paramString.setLiteral("poliParam",
+				"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>Polygon ((45.381781 8.941661, 45.590982 8.990870, 45.549157 9.355141, 45.367502 9.382289, 45.381781 8.941661))");
 
-		try (QueryExecution qe1 = QueryExecutionFactory.create(queryString, spatialDataset)) {
+		System.out.println(paramString.toString());
+
+		try (
+
+				QueryExecution qe1 = QueryExecutionFactory.create(paramString.asQuery(), spatialDataset)) {
 			ResultSet rs = qe1.execSelect();
-			ResultSetFormatter.out(System.out, rs, qe1.getQuery());
+			ResultSetFormatter.out(System.out, rs, paramString.asQuery());
 		}
 	}
 
