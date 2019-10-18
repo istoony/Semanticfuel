@@ -143,6 +143,7 @@ public class FetcherService extends AbstractService {
 		reader.addParamParser(Ontology.SourceList.STATION_OWNER, this::parseCommas);
 		reader.addParamParser(Ontology.SourceList.STATION_TYPE, this::parseCommas);
 		reader.addParamParser(Ontology.SourceList.StationAddress.STATION_ADDRESS, this::parseCommas);
+		reader.addItemParser(this::parseStationGeometry);
 
 		try {
 			reader.parse(new InputStreamReader(new ByteArrayInputStream(source)), true);
@@ -168,6 +169,27 @@ public class FetcherService extends AbstractService {
 		}
 
 		return reader.getItems();
+	}
+
+	private CSVItem parseStationGeometry(CSVItem item) {
+		String lat = item.getParam(Ontology.SourceList.StationCoordinate.STATION_LATITUDE);
+		String lon = item.getParam(Ontology.SourceList.StationCoordinate.STATION_LONGITUDE);
+
+		if (lat == null || lon == null || lat.equals("") || lon.equals(""))
+			return null;
+
+		// check if coordinates are present
+		try {
+			Double.parseDouble(lat);
+			Double.parseDouble(lon);
+		} catch (Exception e) {
+			return null;
+		}
+
+		CSVItem newItem = new CSVItem(item);
+		newItem.addParam(Ontology.SourceList.StationCoordinate.STATION_GEOMETRY, "POINT(" + lat + " " + lon + ")");
+
+		return newItem;
 	}
 
 	private String parseCommas(String source) {

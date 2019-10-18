@@ -15,6 +15,7 @@ public final class Ontology {
 		}
 
 		public static class StationCoordinate {
+			public static final String STATION_GEOMETRY = "Geometria";
 			public static final String STATION_LATITUDE = "Latitudine";
 			public static final String STATION_LONGITUDE = "Longitudine";
 		}
@@ -25,7 +26,7 @@ public final class Ontology {
 
 		public static class StationPump {
 			public static final String PUMP_FUEL = "descCarburante";
-			public static final String PUMP_PIRCE = "Prezzo";
+			public static final String PUMP_PIRCE = "prezzo";
 			public static final String PUMP_SERVICE = "isSelf";
 			public static final String PUMP_UPDATE = "dtComu";
 		}

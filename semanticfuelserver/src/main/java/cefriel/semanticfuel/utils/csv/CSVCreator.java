@@ -4,16 +4,13 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 public class CSVCreator {
 	private List<String> header;
-	private Set<String> fastHeader;
 	private List<CSVItem> rows;
 	private char delimiter;
 	private static final char DEFAULT_DELIMITER = ',';
@@ -24,13 +21,11 @@ public class CSVCreator {
 
 	public CSVCreator() {
 		header = new ArrayList<>();
-		fastHeader = new HashSet<>();
 		rows = new ArrayList<>();
 	}
 
 	public CSVCreator setHeader(List<String> header) {
 		this.header = header;
-		this.fastHeader.addAll(this.header);
 		return this;
 	}
 

@@ -14,7 +14,7 @@
   	
   	rr:subjectMap [
     	rr:termType rr:BlankNode;
-    	rr:class gso:coordinate
+    	rr:class wgs84_pos:Point
   	];
 
   	rr:predicateObjectMap [
@@ -45,21 +45,24 @@
   	rr:predicateObjectMap [
     	rr:predicate gso:city;
     	rr:objectMap [
-      		rml:reference "Comune"
+      		rml:reference "Comune";
+      		rr:datatype xsd:string
     	]
   	];
   	
   	rr:predicateObjectMap [
     	rr:predicate gso:address;
     	rr:objectMap [
-      		rml:reference "Indirizzo"
+      		rml:reference "Indirizzo";
+      		rr:datatype xsd:string
     	]
   	];
 
   	rr:predicateObjectMap [
     	rr:predicate gso:prov;
     	rr:objectMap [
-      		rml:reference "Provincia"
+      		rml:reference "Provincia";
+      		rr:datatype xsd:string
     	]
   	].
   	
@@ -75,18 +78,26 @@
   	];
   	
   	rr:predicateObjectMap [
-    	rr:predicate gso:price;
+    	rr:predicate gso:last_updated;
     	rr:objectMap [
-      		rml:reference "Prezzo";
-      		rr:datatype xsd:double;
+      		rml:reference "dtComu";
+      		rr:datatype xsd:dateTime
     	]
   	];
   	
   	rr:predicateObjectMap [
-    	rr:predicate gso:last_updated;
+    	rr:predicate gso:fuel;
     	rr:objectMap [
-      		rml:reference "dtComu";
-      		rr::datatype xsd:dateTime
+      		rml:reference "descCarburante";
+      		rr:datatype xsd:string
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate gso:price;
+    	rr:objectMap [
+      		rml:reference "prezzo";
+      		rr:datatype xsd:double;
     	]
   	];
   	
@@ -97,7 +108,26 @@
       		rr:datatype xsd:boolean;
     	]
   	].
+  	
+<http://gas_station.example.com/GeometryMapping>
+	rml:logicalSource [
+    	rml:source "src/main/sources/preprocessed_list.csv";
+    	rml:referenceFormulation ql:CSV 
+  	];
+  	
+  	rr:subjectMap [
+    	rr:termType rr:BlankNode;
+    	rr:class geo:Geometry
+  	];
 
+  	rr:predicateObjectMap [
+  		rr:predicate geo:asWKT;
+  		rr:objectMap [
+  			rml:reference "Geometria";
+  			rr:datatype geo:wktLiteral
+  		]
+  	].
+  	
 <http://gas_station.example.com/GasStationMapping>
 	rml:logicalSource [
     	rml:source "src/main/sources/preprocessed_list.csv";
@@ -113,6 +143,7 @@
     	rr:predicate gso:flag;
     	rr:objectMap [
       		rml:reference "Bandiera";
+      		rr:datatype xsd:string
     	]
   	];
   	
@@ -120,6 +151,7 @@
     	rr:predicate gso:owner;
     	rr:objectMap [
       		rml:reference "Gestore";
+      		rr:datatype xsd:string
     	]
   	];
   	
@@ -127,6 +159,7 @@
     	rr:predicate gso:type;
     	rr:objectMap [
       		rml:reference "Tipo Impianto";
+      		rr:datatype xsd:string
     	]
   	];
   	
@@ -134,11 +167,23 @@
     	rr:predicate gso:name;
     	rr:objectMap [
       		rml:reference "Nome Impianto";
+      		rr:datatype xsd:string
     	]
   	];
   	
   	rr:predicateObjectMap [
-    	rr:predicate gso:has_location;
+    	rr:predicate geo:hasGeometry;
+    	rr:objectMap [
+    		rr:parentTriplesMap <http://gas_station.example.com/GeometryMapping>;
+    		rr:joinCondition[
+    			rr:child "idImpianto";
+    			rr:parent "idImpianto";
+    		];
+    	]
+  	];
+  	
+  	rr:predicateObjectMap [
+    	rr:predicate wgs84_pos:location;
     	rr:objectMap [
     		rr:parentTriplesMap <http://gas_station.example.com/LocationMapping>;
     		rr:joinCondition[

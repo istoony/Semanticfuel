@@ -2,6 +2,7 @@ package cefriel.semanticfuel.service.engine;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import be.ugent.rml.Executor;
@@ -29,6 +31,7 @@ import be.ugent.rml.functions.FunctionLoader;
 import be.ugent.rml.functions.lib.GrelProcessor;
 import be.ugent.rml.functions.lib.IDLabFunctions;
 import be.ugent.rml.records.RecordsFactory;
+import be.ugent.rml.store.Quad;
 import be.ugent.rml.store.QuadStore;
 import be.ugent.rml.store.RDF4JStore;
 import be.ugent.rml.term.Term;
@@ -40,22 +43,37 @@ public class QueryEngineService extends AbstractService {
 	}
 
 	public void updateOntology() throws IOException, SpatialIndexException {
-		/**
-		 * Pair<QuadStore, RDF4JStore> result = runRMLParser(); QuadStore tripleList =
-		 * result.getLeft(); RDF4JStore rmlStore = result.getRight();
-		 * 
-		 * List<Quad> triples = tripleList.getQuads(null, null, null);
-		 * 
-		 * // triples.forEach(a -> System.out.println( // a.getSubject().toString() + "
-		 * " + a.getPredicate().toString() + " " + // a.getObject().toString()));
-		 * 
-		 * tripleList.write(new FileWriter("prova.ttl"), "turtle"); /** Model model =
-		 * ModelFactory.createDefaultModel(); model.set for (Quad q : triples) {
-		 * Resource res = model.createResource(q.getSubject().getValue());
-		 * res.addProperty(model.createProperty(q.getPredicate().getValue()),
-		 * q.getObject().getValue()); }
-		 * 
-		 **/
+		boolean skip = false;
+
+		long start = 0;
+
+		if (!skip) {
+			System.out.println("parso");
+			start = System.currentTimeMillis();
+
+			Pair<QuadStore, RDF4JStore> result = runRMLParser();
+			QuadStore tripleList = result.getLeft();
+			RDF4JStore rmlStore = result.getRight();
+
+			List<Quad> triples = tripleList.getQuads(null, null, null);
+
+			System.out.println("finito " + ((System.currentTimeMillis() - start) / 1000));
+
+			// triples.forEach(a -> System.out.println(
+			// a.getSubject().toString() + " " + a.getPredicate().toString() + " " +
+			// a.getObject().toString()));
+
+			System.out.println("scrivo");
+			start = System.currentTimeMillis();
+
+			tripleList.write(new FileWriter("prova.ttl"), "turtle");
+
+			System.out.println("finito " + ((System.currentTimeMillis() - start) / 1000));
+		}
+
+		System.out.println("leggo");
+		start = System.currentTimeMillis();
+
 		Model model = ModelFactory.createDefaultModel();
 		try {
 			model.read(new FileInputStream("prova.ttl"), null, "TTL");
@@ -63,15 +81,12 @@ public class QueryEngineService extends AbstractService {
 			e.printStackTrace();
 		}
 
-		/**
-		 * for (Namespace ns : rmlStore.getNamespaces()) {
-		 * model.setNsPrefix(ns.getPrefix(), ns.getName());
-		 * System.out.println(ns.getPrefix() + " " + ns.getName()); }
-		 * 
-		 * 
-		 * StmtIterator si = model.listStatements(); while (si.hasNext()) { //
-		 * System.out.println(si.next()); }
-		 **/
+		System.out.println("finito " + ((System.currentTimeMillis() - start) / 1000));
+
+		StmtIterator si = model.listStatements();
+		while (si.hasNext()) {
+			// System.out.println(si.next());
+		}
 
 		// Create a new query
 		String queryString = "PREFIX gso:  <http://gas_station.example.com/data#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
@@ -84,15 +99,13 @@ public class QueryEngineService extends AbstractService {
 		Query query = QueryFactory.create(coneQuery);
 
 		// Execute the query and obtain results
-		QueryExecution qe = QueryExecutionFactory.create(query, model);
-		ResultSet results = qe.execSelect();
+		try (QueryExecution qe = QueryExecutionFactory.create(query, model)) {
+			ResultSet results = qe.execSelect();
 
-		System.out.println("result");
-		// Output query results
-		ResultSetFormatter.out(System.out, results, query);
-
-		// Important ‑ free up resources used running the query
-		qe.close();
+			System.out.println("result");
+			// Output query results
+			ResultSetFormatter.out(System.out, results, query);
+		}
 
 		boolean stop = false;
 		if (stop)
@@ -102,11 +115,11 @@ public class QueryEngineService extends AbstractService {
 
 		GeoSPARQLConfig.setupMemoryIndex();
 		Dataset spatialDataset = SpatialIndex.wrapModel(model);
-		queryString = "PREFIX spatial: <http://jena.apache.org/spatial#>"
-				+ " PREFIX uom: <http://www.w3.org/2007/ont/unit#>"
-				+ " PREFIX gso:  <http://gas_station.example.com/data#> "
-				+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "SELECT ?placeName" + " WHERE{"
-				+ "    ?place spatial:nearby (13.60 3.71 1 uom:km) . ?place rdf:type gso:gas_station}";
+		queryString = "PREFIX gso:  <http://gas_station.example.com/data#> "
+				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> " + " SELECT ?station"
+				+ " WHERE{?station gso:has_geometry ?feat . ?feat geo:hasGeometry ?geom . ? geo:sfContains ?geom . "
+				+ " ?station gso:has_pump ?pump . ?pump gso:fuel ?}";
 
 		System.out.println("yoyo");
 

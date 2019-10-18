@@ -21,6 +21,7 @@ public class CSVExtractor {
 	private CSVParser parser;
 	private BufferedReader reader;
 	private Map<String, BiFunction<String, String, Map<String, String>>> parsers;
+	private Function<CSVItem, CSVItem> itemParser;
 	private List<CSVItem> items;
 	private char delimiter;
 	private int lineToSkip;
@@ -113,7 +114,11 @@ public class CSVExtractor {
 				}
 			}
 
-			items.add(item);
+			if (itemParser != null)
+				item = itemParser.apply(item);
+
+			if (item != null)
+				items.add(item);
 		}
 
 		return onEnd();
@@ -155,6 +160,10 @@ public class CSVExtractor {
 	 */
 	public void addParamParser(String param) {
 		addParamParser(param, value -> value);
+	}
+
+	public void addItemParser(Function<CSVItem, CSVItem> parser) {
+		this.itemParser = parser;
 	}
 
 	/**
