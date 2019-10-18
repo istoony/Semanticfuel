@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,11 +44,14 @@ public class FetcherService extends AbstractService {
 	private final static String PATH_TO_SOURCES = "src" + File.separator + "main" + File.separator + "sources";
 	private final static String TARGET_PRICE = "preprocessed_prices.csv";
 	private final static String TARGET_LIST = "preprocessed_list.csv";
+	
+	@Autowired
+	private CSVExtractor reader;
 
 	/**
 	 * Fetch data from the two MISE's sources every day at 8:30 AM.
 	 */
-	// @Scheduled(cron = "0 30 8 * * *")
+//	@Scheduled(cron = "0 30 8 * * *")
 	@Scheduled(fixedRate = 60000)
 	public void fetch() {
 		System.out.println("saving");
@@ -156,7 +160,6 @@ public class FetcherService extends AbstractService {
 	}
 
 	private List<CSVItem> preprocessListPrices(byte[] source) {
-		CSVExtractor reader = new CSVExtractor();
 
 		reader.setDelimiter(';').skipFirstNLines(1);
 		reader.addParamParser(Ontology.SourcePrices.StationPump.PUMP_UPDATE, this::parseDateTime);

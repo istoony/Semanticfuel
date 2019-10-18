@@ -24,6 +24,7 @@ import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.springframework.stereotype.Service;
 
 import be.ugent.rml.Executor;
 import be.ugent.rml.Utils;
@@ -37,10 +38,8 @@ import be.ugent.rml.store.RDF4JStore;
 import be.ugent.rml.term.Term;
 import cefriel.semanticfuel.service.AbstractService;
 
+@Service
 public class QueryEngineService extends AbstractService {
-	public static void main(String[] args) throws IOException, SpatialIndexException {
-		new QueryEngineService().updateOntology();
-	}
 
 	public void updateOntology() throws IOException, SpatialIndexException {
 		boolean skip = true;

@@ -9,7 +9,6 @@ import cefriel.semanticfuel.utils.AbstractTest;
 public class RmlMapping extends AbstractTest {
 
 	@Test
-
 	public void dbpediaSpotlight() {
 		QuadStore outputStore = new RDF4JStore();
 	}

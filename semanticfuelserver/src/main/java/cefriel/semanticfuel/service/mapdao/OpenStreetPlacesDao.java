@@ -38,7 +38,7 @@ public class OpenStreetPlacesDao extends AbstractService {
 			p.setRegion(((Map<String, String>) feature.get("properties")).get("region"));
 			p.setName(((Map<String, String>) feature.get("properties")).get("name"));
 			List<Double> coordinates = ((Map<String, List<Double>>) feature.get("geometry")).get("coordinates");
-			Point coor = new Point(coordinates.get(0), coordinates.get(1));
+			Point coor = new Point(coordinates.get(1), coordinates.get(0));
 			p.setCoordinates(coor);
 			result.add(p);
 		}

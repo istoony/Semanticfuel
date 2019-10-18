@@ -1,8 +1,11 @@
 package cefriel.semanticfuel.service.map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,12 +31,14 @@ public class OpenStreetMapDaoTest extends AbstractTest {
 		for (Point point : result) {
 			LOG.debug("Point found {}", point);
 		}
+		assertTrue(result.size() > 100);
 	}
 	
 	@Test
 	public void getPlacesTest() {
 		List<Place> result = openStreetPlacesDao.getPlace("Venice");
 		LOG.debug("Places Found = {}", result);
+		assertNotNull(result.size());
 	}
 	
 	@Test
@@ -41,7 +46,7 @@ public class OpenStreetMapDaoTest extends AbstractTest {
 		String s = "8.681496";
 		Double d = Double.valueOf(s);
 		Double expected = 8.681496;
-		Assertions.assertEquals(expected, d);
+		assertEquals(expected, d);
 	}
 
 }

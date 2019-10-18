@@ -1,0 +1,15 @@
+.selected {
+    background-color: brown;
+    color: #FFF;
+}
+
+.display-block {
+	display: block;
+}
+.display-none {
+	display: none;
+}
+
+.table-hover tbody tr:hover td {
+    background: #e8f0fe;
+}
