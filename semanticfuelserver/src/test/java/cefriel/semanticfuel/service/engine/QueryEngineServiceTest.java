@@ -1,53 +1,52 @@
 package cefriel.semanticfuel.service.engine;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
-
+import org.apache.jena.geosparql.implementation.jts.CustomCoordinateSequenceFactory;
+import org.apache.jena.query.Query;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.CoordinateSequenceFactory;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cefriel.semanticfuel.model.DirectionRequest;
-import cefriel.semanticfuel.model.DirectionResponse;
-import cefriel.semanticfuel.model.Place;
-import cefriel.semanticfuel.service.fetcher.ModelKeeperService;
-import cefriel.semanticfuel.service.map.OpenStreetDirectionService;
-import cefriel.semanticfuel.service.map.OpenStreetPlacesService;
 import cefriel.semanticfuel.utils.AbstractTest;
 
 public class QueryEngineServiceTest extends AbstractTest {
 	@Autowired
-	private ModelKeeperService engine;
-
-	@Autowired
-	private OpenStreetPlacesService openStreetPlacesService;
-
-	@Autowired
-	private OpenStreetDirectionService openStreetDirectionService;
+	private QueryManager queryManager;
 
 	@Test
-	public void updateOntology() {
-		List<Place> startList = openStreetPlacesService.getListOfPlaces("Via Manzoni, Lecco");
-		LOG.debug("Start List = {}", startList);
-		Place start = startList.get(0);
+	public void buildQueryTest() {
+		CoordinateSequenceFactory pointFactory = new CustomCoordinateSequenceFactory();
+		Coordinate[] coordinates = { new Coordinate(1, 1) };
+		CoordinateSequence cSequence = pointFactory.create(coordinates);
+		Point p = new Point(cSequence, new GeometryFactory());
 
-		List<Place> endListList = openStreetPlacesService.getListOfPlaces("Duomo di Milano, Milano");
-		LOG.debug("End List = {}", endListList);
-		Place end = endListList.get(0);
+		Query query = queryManager.buildQuery("Benzina", p);
 
-		DirectionRequest request = new DirectionRequest();
-		request.setStart(start);
-		request.setEnd(end);
-		request.setFuel("Benzina");
+		String targetQuery = "PREFIX  geo:  <http://www.opengis.net/ont/geosparql#>\n"
+				+ "PREFIX  gso:  <http://gas_station.example.com/data#>\n"
+				+ "PREFIX  wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n"
+				+ "PREFIX  geof: <http://www.opengis.net/def/function/geosparql/>\n" + "PREFIX  bif:  <bif:>\n"
+				+ "SELECT  ?name ?address ?city ?flag ?lat ?long ?owner ?price ?province ?isself ?type ?fuel\n"
+				+ "WHERE\n" + "{ ?station  gso:name         ?name ;\n" + "            gso:owner        ?owner ;\n"
+				+ "           gso:type         ?type ;\n" + "          gso:flag         ?flag ;\n"
+				+ "          gso:has_address  ?fullAddress .\n" + "?fullAddress  gso:address  ?address ;\n"
+				+ "         gso:city         ?city ;\n" + "         gso:prov         ?province .\n"
+				+ "?station  gso:has_pump     ?pump .\n" + "?pump     gso:fuel         ?fuel ;\n"
+				+ "          gso:is_self      ?isself ;\n" + "          gso:price        ?price\n"
+				+ "FILTER bif:contains(?fuel, \"Benzina\")\n" + "?station  wgs84_pos:location  ?location .\n"
+				+ "?location  wgs84_pos:lat      ?lat ;\n" + "         wgs84_pos:long      ?long .\n"
+				+ "?station  geo:hasGeometry     ?geom .\n" + "?geom     geo:asWKT           ?wkt\n"
+				+ "FILTER geof:sfWithin(?wkt, \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT (1 1)\"^^geo:wktLiteral)\n"
+				+ "}";
 
-		DirectionResponse response = openStreetDirectionService.computeResponse(request);
+		String comparableQuery = query.toString().replaceAll("\\s+", "");
+		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
 
-		assertNotNull(response.getGasStation());
-		assertTrue(response.getPathCoordinates().size() > 100);
-
-		assertNotNull(response.getGasStation());
-		assertTrue(response.getGasStation().size() > 5);
-
+		assertEquals(comparableQuery, comparableTargetQuery);
 	}
 };

@@ -7,7 +7,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.shared.PrefixMapping;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.stereotype.Service;
 
@@ -16,27 +15,28 @@ import cefriel.semanticfuel.service.AbstractService;
 @Service
 public class QueryManager extends AbstractService {
 	private static final String PREFIX_GEO = "geo";
-	private static final String PREFIX_RDF = "rdf";
 	private static final String PREFIX_GSO = "gso";
 	private static final String PREFIX_GEOF = "geof";
 	private static final String PREFIX_WGS84 = "wgs84_pos";
+	private static final String PREFIX_BIF = "bif";
 	private static final String NS_GEO = GEO.NAMESPACE;
-	private static final String NS_RDF = RDF.NAMESPACE;
 	private static final String NS_GSO = "http://gas_station.example.com/data#";
 	private static final String NS_GEOF = GEOF.NAMESPACE;
 	private static final String NS_WGS84 = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+	private static final String NS_BIF = "bif:";
 
-	private static final String QUERY_TARGET_STATION_NAME = "name";
-	private static final String QUERY_TARGET_STATION_OWNER = "owner";
-	private static final String QUERY_TARGET_STATION_FLAG = "flag";
-	private static final String QUERY_TARGET_STATION_TYPE = "type";
-	private static final String QUERY_TARGET_STATION_ADDRESS = "address";
-	private static final String QUERY_TARGET_STATION_CITY = "city";
-	private static final String QUERY_TARGET_STATION_PROVINCE = "province";
-	private static final String QUERY_TARGET_STATION_PRICE = "price";
-	private static final String QUERY_TARGET_STATION_SERVICE = "isself";
-	private static final String QUERY_TARGET_STATION_LAT = "lat";
-	private static final String QUERY_TARGET_STATION_LONG = "long";
+	protected static final String QUERY_TARGET_STATION_NAME = "name";
+	protected static final String QUERY_TARGET_STATION_OWNER = "owner";
+	protected static final String QUERY_TARGET_STATION_FLAG = "flag";
+	protected static final String QUERY_TARGET_STATION_TYPE = "type";
+	protected static final String QUERY_TARGET_STATION_ADDRESS = "address";
+	protected static final String QUERY_TARGET_STATION_CITY = "city";
+	protected static final String QUERY_TARGET_STATION_PROVINCE = "province";
+	protected static final String QUERY_TARGET_FUEL_PRICE = "price";
+	protected static final String QUERY_TARGET_PUMP_TOS = "isself";
+	protected static final String QUERY_TARGET_STATION_LAT = "lat";
+	protected static final String QUERY_TARGET_STATION_LONG = "long";
+	protected static final String QUERY_TARGET_PUMP_FUEL = "fuel";
 
 	private static final String QUERY_PARAM_FUEL = "fuelParam";
 	private static final String QUERY_PARAM_AREA = "areaParam";
@@ -56,15 +56,15 @@ public class QueryManager extends AbstractService {
 		pm.setNsPrefix(PREFIX_GEO, NS_GEO);
 		pm.setNsPrefix(PREFIX_GEOF, NS_GEOF);
 		pm.setNsPrefix(PREFIX_GSO, NS_GSO);
-		pm.setNsPrefix(PREFIX_RDF, NS_RDF);
 		pm.setNsPrefix(PREFIX_WGS84, NS_WGS84);
+		pm.setNsPrefix(PREFIX_BIF, NS_BIF);
 
 		// target params
 		String query = "SELECT ?" + QUERY_TARGET_STATION_NAME + " ?" + QUERY_TARGET_STATION_ADDRESS + " ?"
 				+ QUERY_TARGET_STATION_CITY + " ?" + QUERY_TARGET_STATION_FLAG + " ?" + QUERY_TARGET_STATION_LAT + " ?"
 				+ QUERY_TARGET_STATION_LONG + " ?" + QUERY_TARGET_STATION_OWNER + " ?" + QUERY_TARGET_STATION_OWNER
-				+ " ?" + QUERY_TARGET_STATION_PRICE + " ?" + QUERY_TARGET_STATION_PROVINCE + " ?"
-				+ QUERY_TARGET_STATION_SERVICE + " ?" + QUERY_TARGET_STATION_TYPE;
+				+ " ?" + QUERY_TARGET_FUEL_PRICE + " ?" + QUERY_TARGET_STATION_PROVINCE + " ?" + QUERY_TARGET_PUMP_TOS
+				+ " ?" + QUERY_TARGET_STATION_TYPE + " ?" + QUERY_TARGET_PUMP_FUEL;
 		// clauses
 		query += " WHERE {";
 		// station attributes
@@ -77,8 +77,9 @@ public class QueryManager extends AbstractService {
 				+ QUERY_TARGET_STATION_CITY + " . " + QUERY_VAR_ADDRESS + " gso:prov ?" + QUERY_TARGET_STATION_PROVINCE;
 		// station pumps
 		query += " . " + QUERY_VAR_STATION + " gso:has_pump " + QUERY_VAR_PUMP + " . " + QUERY_VAR_PUMP + " gso:fuel ?"
-				+ QUERY_PARAM_FUEL + " . " + QUERY_VAR_PUMP + " gso:is_self ?" + QUERY_TARGET_STATION_SERVICE + " . "
-				+ QUERY_VAR_PUMP + " gso:price ?" + QUERY_TARGET_STATION_PRICE;
+				+ QUERY_TARGET_PUMP_FUEL + " . " + QUERY_VAR_PUMP + " gso:is_self ?" + QUERY_TARGET_PUMP_TOS + " . "
+				+ QUERY_VAR_PUMP + " gso:price ?" + QUERY_TARGET_FUEL_PRICE;
+		query += " . FILTER(bif:contains(?" + QUERY_TARGET_PUMP_FUEL + ", ?" + QUERY_PARAM_FUEL + "))";
 		// station location
 		query += " . " + QUERY_VAR_STATION + " wgs84_pos:location " + QUERY_VAR_LOCATION + " . " + QUERY_VAR_LOCATION
 				+ " wgs84_pos:lat ?" + QUERY_TARGET_STATION_LAT + " . " + QUERY_VAR_LOCATION + " wgs84_pos:long ?"
@@ -88,6 +89,7 @@ public class QueryManager extends AbstractService {
 				+ " geo:asWKT " + QUERY_VAR_WKT;
 		query += " . FILTER(geof:sfWithin(" + QUERY_VAR_WKT + ", ?" + QUERY_PARAM_AREA + "^^geo:wktLiteral))}";
 
+		paramString = new ParameterizedSparqlString();
 		paramString.setNsPrefixes(pm);
 		paramString.setCommandText(query);
 	}

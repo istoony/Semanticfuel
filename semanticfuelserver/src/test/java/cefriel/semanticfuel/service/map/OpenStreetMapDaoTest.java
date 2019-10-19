@@ -27,7 +27,7 @@ public class OpenStreetMapDaoTest extends AbstractTest {
 	public void getRequestTest() {
 		Point start = new Point(8.681495,49.41461);
 		Point end = new Point(9.687872,39.420318);
-		List<Point> result = openStreatDirectionDao.server(start, end);
+		List<Point> result = openStreatDirectionDao.getDirection(start, end);
 		for (Point point : result) {
 			LOG.debug("Point found {}", point);
 		}

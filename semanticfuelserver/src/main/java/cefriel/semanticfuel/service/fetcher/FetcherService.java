@@ -45,6 +45,8 @@ public class FetcherService extends AbstractService {
 	private final static String TARGET_PRICE = "preprocessed_prices.csv";
 	private final static String TARGET_LIST = "preprocessed_list.csv";
 
+	private final static String PATH_TO_MODEL = "src" + File.separator + "main" + File.separator + "model";
+
 	@Autowired
 	private ModelKeeperService modelManager;
 
@@ -92,8 +94,10 @@ public class FetcherService extends AbstractService {
 
 		Log.info("Updates fetched in " + ((System.currentTimeMillis() - fetchingStart) / 1000) + " seconds");
 
+		new File(PATH_TO_MODEL).mkdirs();
+
 		// update the ontology in memory
-		modelManager.updateOntology(PATH_TO_SOURCES);
+		modelManager.updateOntology(PATH_TO_MODEL);
 	}
 
 	/**

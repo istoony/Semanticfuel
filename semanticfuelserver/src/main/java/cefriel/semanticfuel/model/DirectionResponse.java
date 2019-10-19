@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DirectionResponse {
 	private List<Point> pathCoordinates;
-	private List<GasStation> gasStation;
+	private List<GasStation> gasStations;
 
 	public List<Point> getPathCoordinates() {
 		return pathCoordinates;
@@ -14,11 +14,11 @@ public class DirectionResponse {
 		this.pathCoordinates = pathCoordinates;
 	}
 
-	public List<GasStation> getGasStation() {
-		return gasStation;
+	public List<GasStation> getGasStations() {
+		return gasStations;
 	}
 
-	public void setGasStation(List<GasStation> gasStation) {
-		this.gasStation = gasStation;
+	public void setGasStations(List<GasStation> gasStations) {
+		this.gasStations = gasStations;
 	}
 }

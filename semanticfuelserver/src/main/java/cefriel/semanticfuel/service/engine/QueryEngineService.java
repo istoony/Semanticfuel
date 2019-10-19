@@ -41,12 +41,17 @@ public class QueryEngineService extends AbstractService {
 		// build the query
 		Query query = queryManager.buildQuery(fuel, searchingArea);
 
-		Log.debug("Running query: " + query.toString());
+		Log.debug("Running query: \n" + query.toString());
 
 		Map<Integer, GasStation> gasStations = new HashMap<>();
 		try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
+			long queryStart = System.currentTimeMillis();
+
 			// run the query
 			ResultSet rs = qe.execSelect();
+
+			Log.info("Log executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds, with "
+					+ rs.getRowNumber() + " results");
 
 			// parse the result, one line per pump found (possibly multiple lines for each
 			// station)
@@ -66,18 +71,18 @@ public class QueryEngineService extends AbstractService {
 	}
 
 	private GasStation parseGasStation(QuerySolution queryRaw) {
-		String stationName = queryRaw.get("name").asLiteral().toString();
-		String stationOwner = queryRaw.get("owner").asLiteral().toString();
-		String stationType = queryRaw.get("type").asLiteral().toString();
-		String stationFlag = queryRaw.get("flag").asLiteral().toString();
-		String stationAddress = queryRaw.get("address").asLiteral().toString();
-		String stationCity = queryRaw.get("city").asLiteral().toString();
-		String stationProvince = queryRaw.get("province").asLiteral().toString();
-		String stationPumpFuel = queryRaw.get("fuel").asLiteral().toString();
-		String stationPumpFuelPrice = queryRaw.get("price").asLiteral().toString();
-		String stationPumpService = queryRaw.get("isSelf").asLiteral().toString();
-		String stationLat = queryRaw.get("long").asLiteral().toString();
-		String stationLong = queryRaw.get("lat").asLiteral().toString();
+		String stationName = queryRaw.get(QueryManager.QUERY_TARGET_STATION_NAME).asLiteral().toString();
+		String stationOwner = queryRaw.get(QueryManager.QUERY_TARGET_STATION_OWNER).asLiteral().toString();
+		String stationType = queryRaw.get(QueryManager.QUERY_TARGET_STATION_TYPE).asLiteral().toString();
+		String stationFlag = queryRaw.get(QueryManager.QUERY_TARGET_STATION_FLAG).asLiteral().toString();
+		String stationAddress = queryRaw.get(QueryManager.QUERY_TARGET_STATION_ADDRESS).asLiteral().toString();
+		String stationCity = queryRaw.get(QueryManager.QUERY_TARGET_STATION_CITY).asLiteral().toString();
+		String stationProvince = queryRaw.get(QueryManager.QUERY_TARGET_STATION_PROVINCE).asLiteral().toString();
+		String stationPumpFuelPrice = queryRaw.get(QueryManager.QUERY_TARGET_FUEL_PRICE).asLiteral().toString();
+		String stationPumpService = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_TOS).asLiteral().toString();
+		String stationPumpFuel = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_FUEL).asLiteral().toString();
+		String stationLat = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LAT).asLiteral().toString();
+		String stationLong = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LONG).asLiteral().toString();
 
 		StationBuilder builder = new StationBuilder();
 		builder.setName(stationName).setFlag(stationFlag).setOwner(stationOwner).setType(stationType)

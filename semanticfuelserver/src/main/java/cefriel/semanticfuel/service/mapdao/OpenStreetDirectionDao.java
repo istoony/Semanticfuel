@@ -16,7 +16,7 @@ import cefriel.semanticfuel.service.AbstractService;
 public class OpenStreetDirectionDao extends AbstractService {
 	private static final String DIRECTION_GET_URL = "https://api.openrouteservice.org/v2/directions/driving-car?api_key={key}&start={start}&end={end}";
 
-	public List<Point> server(Point start, Point end) {
+	public List<Point> getDirection(Point start, Point end) {
 		String result = performRestRequest(start, end);
 		List<Point> points = parseJson(result);
 
