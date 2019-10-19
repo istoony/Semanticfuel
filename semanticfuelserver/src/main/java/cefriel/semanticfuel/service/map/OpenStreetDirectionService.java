@@ -16,11 +16,11 @@ import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cefriel.semanticfuel.model.DirectionRequest;
+import cefriel.semanticfuel.model.DirectionResponse;
+import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.AbstractService;
 import cefriel.semanticfuel.service.mapdao.OpenStreetDirectionDao;
-import model.DirectionRequest;
-import model.DirectionResponse;
-import model.Point;
 
 @Service
 public class OpenStreetDirectionService extends AbstractService {

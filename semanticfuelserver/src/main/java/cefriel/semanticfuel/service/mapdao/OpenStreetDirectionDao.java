@@ -9,8 +9,8 @@ import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.AbstractService;
-import model.Point;
 
 @Service
 public class OpenStreetDirectionDao extends AbstractService {

@@ -1,4 +1,4 @@
-package model;
+package cefriel.semanticfuel.model;
 
 public class Place {
 

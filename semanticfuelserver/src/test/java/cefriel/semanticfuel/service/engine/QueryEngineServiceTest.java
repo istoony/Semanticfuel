@@ -8,13 +8,13 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cefriel.semanticfuel.model.DirectionRequest;
+import cefriel.semanticfuel.model.DirectionResponse;
+import cefriel.semanticfuel.model.Place;
 import cefriel.semanticfuel.service.fetcher.ModelKeeperService;
 import cefriel.semanticfuel.service.map.OpenStreetDirectionService;
 import cefriel.semanticfuel.service.map.OpenStreetPlacesService;
 import cefriel.semanticfuel.utils.AbstractTest;
-import model.DirectionRequest;
-import model.DirectionResponse;
-import model.Place;
 
 public class QueryEngineServiceTest extends AbstractTest {
 	@Autowired

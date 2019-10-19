@@ -8,7 +8,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.opengis.geometry.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.springframework.stereotype.Service;
 
 import cefriel.semanticfuel.service.AbstractService;
@@ -19,10 +19,12 @@ public class QueryManager extends AbstractService {
 	private static final String PREFIX_RDF = "rdf";
 	private static final String PREFIX_GSO = "gso";
 	private static final String PREFIX_GEOF = "geof";
+	private static final String PREFIX_WGS84 = "wgs84_pos";
 	private static final String NS_GEO = GEO.NAMESPACE;
 	private static final String NS_RDF = RDF.NAMESPACE;
 	private static final String NS_GSO = "http://gas_station.example.com/data#";
 	private static final String NS_GEOF = GEOF.NAMESPACE;
+	private static final String NS_WGS84 = "http://www.w3.org/2003/01/geo/wgs84_pos#";
 
 	private static final String QUERY_TARGET_STATION_NAME = "name";
 	private static final String QUERY_TARGET_STATION_OWNER = "owner";
@@ -55,6 +57,7 @@ public class QueryManager extends AbstractService {
 		pm.setNsPrefix(PREFIX_GEOF, NS_GEOF);
 		pm.setNsPrefix(PREFIX_GSO, NS_GSO);
 		pm.setNsPrefix(PREFIX_RDF, NS_RDF);
+		pm.setNsPrefix(PREFIX_WGS84, NS_WGS84);
 
 		// target params
 		String query = "SELECT ?" + QUERY_TARGET_STATION_NAME + " ?" + QUERY_TARGET_STATION_ADDRESS + " ?"
@@ -87,16 +90,6 @@ public class QueryManager extends AbstractService {
 
 		paramString.setNsPrefixes(pm);
 		paramString.setCommandText(query);
-
-		paramString.setCommandText("PREFIX gso:  <http://gas_station.example.com/data#> "
-				+ " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
-				+ " PREFIX geo: <http://www.opengis.net/ont/geosparql#> "
-				+ " PREFIX geof: <http://www.opengis.net/def/function/geosparql/> "
-				+ " SELECT ?name ?owner ?flag ?type ?address ?province ?price ?fuel ?isSelf ?city ?lot ?lang"
-				+ " WHERE{?station geo:hasGeometry ?geom . " + " ?geom geo:asWKT ?wkt . "
-				+ " ?station gso:has_pump ?pump . ?pump gso:fuel ?fuelParam . ?station gso:name ?name . "
-				+ " ?station gso:has_address ?fullAddress . ?address gso:city ?city ."
-				+ " FILTER(geof:sfWithin(?wkt, ?poliParam" + "^^geo:wktLiteral))}");
 	}
 
 	public Query buildQuery(String fuel, Geometry target) {

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.utils.AbstractTest;
-import model.Point;
 
 public class OpenStreetDirectionServiceTest extends AbstractTest {
 

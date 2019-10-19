@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cefriel.semanticfuel.model.Place;
 import cefriel.semanticfuel.service.mapdao.OpenStreetPlacesDao;
-import model.Place;
 
 @Service
 public class OpenStreetPlacesService {

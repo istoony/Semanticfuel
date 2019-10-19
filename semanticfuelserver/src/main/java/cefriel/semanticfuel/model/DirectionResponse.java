@@ -1,9 +1,8 @@
-package model;
+package cefriel.semanticfuel.model;
 
 import java.util.List;
 
 public class DirectionResponse {
-
 	private List<Point> pathCoordinates;
 	private List<GasStation> gasStation;
 
@@ -22,5 +21,4 @@ public class DirectionResponse {
 	public void setGasStation(List<GasStation> gasStation) {
 		this.gasStation = gasStation;
 	}
-
 }

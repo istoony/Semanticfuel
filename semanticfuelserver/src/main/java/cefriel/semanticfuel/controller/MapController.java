@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cefriel.semanticfuel.model.DirectionRequest;
+import cefriel.semanticfuel.model.DirectionResponse;
+import cefriel.semanticfuel.model.Place;
 import cefriel.semanticfuel.service.map.OpenStreetDirectionService;
 import cefriel.semanticfuel.service.map.OpenStreetPlacesService;
-import model.DirectionRequest;
-import model.DirectionResponse;
-import model.Place;
 
 @RestController
 @RequestMapping("/api")

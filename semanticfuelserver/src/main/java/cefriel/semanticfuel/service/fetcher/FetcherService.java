@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -98,12 +97,11 @@ public class FetcherService extends AbstractService {
 	}
 
 	/**
-	 * Async method to download a given resource.
+	 * Method to download a given resource.
 	 * 
 	 * @param resourcePath the url of the resource
 	 * @return the buffer of byte representing the content of the resource
 	 */
-	@Async
 	private Future<byte[]> fetchFile(String resourcePath) {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
@@ -119,7 +117,6 @@ public class FetcherService extends AbstractService {
 		return new AsyncResult<>(null);
 	}
 
-	@Async
 	private Future<Boolean> saveFile(String destinationFile, byte[] content,
 			Function<byte[], List<CSVItem>> preProcessingFunction) {
 		if (preProcessingFunction == null) {

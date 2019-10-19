@@ -1,4 +1,4 @@
-package model;
+package cefriel.semanticfuel.model;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

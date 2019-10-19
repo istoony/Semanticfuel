@@ -9,11 +9,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cefriel.semanticfuel.model.Place;
+import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.mapdao.OpenStreetDirectionDao;
 import cefriel.semanticfuel.service.mapdao.OpenStreetPlacesDao;
 import cefriel.semanticfuel.utils.AbstractTest;
-import model.Place;
-import model.Point;
 
 public class OpenStreetMapDaoTest extends AbstractTest {
 

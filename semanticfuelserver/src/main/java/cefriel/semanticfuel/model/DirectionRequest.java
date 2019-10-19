@@ -1,7 +1,6 @@
-package model;
+package cefriel.semanticfuel.model;
 
 public class DirectionRequest {
-
 	private Place start;
 	private Place end;
 	private String fuel;
@@ -29,5 +28,4 @@ public class DirectionRequest {
 	public void setEnd(Place end) {
 		this.end = end;
 	}
-
 }
