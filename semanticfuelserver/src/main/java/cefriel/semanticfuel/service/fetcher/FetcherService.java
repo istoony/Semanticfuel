@@ -149,10 +149,10 @@ public class FetcherService extends AbstractService {
 		CSVExtractor reader = new CSVExtractor();
 
 		reader.setDelimiter(';').skipFirstNLines(1);
-		reader.addParamParser(Ontology.SourceList.STATION_NAME, this::parseCommas);
-		reader.addParamParser(Ontology.SourceList.STATION_OWNER, this::parseCommas);
-		reader.addParamParser(Ontology.SourceList.STATION_TYPE, this::parseCommas);
-		reader.addParamParser(Ontology.SourceList.StationAddress.STATION_ADDRESS, this::parseCommas);
+		reader.addParamParser(RMLMapping.SourceList.STATION_NAME, this::parseCommas);
+		reader.addParamParser(RMLMapping.SourceList.STATION_OWNER, this::parseCommas);
+		reader.addParamParser(RMLMapping.SourceList.STATION_TYPE, this::parseCommas);
+		reader.addParamParser(RMLMapping.SourceList.StationAddress.STATION_ADDRESS, this::parseCommas);
 		reader.addItemParser(this::parseStationGeometry);
 
 		try {
@@ -169,7 +169,7 @@ public class FetcherService extends AbstractService {
 		CSVExtractor reader = new CSVExtractor();
 
 		reader.setDelimiter(';').skipFirstNLines(1);
-		reader.addParamParser(Ontology.SourcePrices.StationPump.PUMP_UPDATE, this::parseDateTime);
+		reader.addParamParser(RMLMapping.SourcePrices.StationPump.PUMP_UPDATE, this::parseDateTime);
 
 		try {
 			reader.parse(new InputStreamReader(new ByteArrayInputStream(source)), true);
@@ -182,8 +182,8 @@ public class FetcherService extends AbstractService {
 	}
 
 	private CSVItem parseStationGeometry(CSVItem item) {
-		String lat = item.getParam(Ontology.SourceList.StationCoordinate.STATION_LATITUDE);
-		String lon = item.getParam(Ontology.SourceList.StationCoordinate.STATION_LONGITUDE);
+		String lat = item.getParam(RMLMapping.SourceList.StationCoordinate.STATION_LATITUDE);
+		String lon = item.getParam(RMLMapping.SourceList.StationCoordinate.STATION_LONGITUDE);
 
 		if (lat == null || lon == null || lat.equals("") || lon.equals(""))
 			return null;
@@ -197,7 +197,7 @@ public class FetcherService extends AbstractService {
 		}
 
 		CSVItem newItem = new CSVItem(item);
-		newItem.addParam(Ontology.SourceList.StationCoordinate.STATION_GEOMETRY, "POINT(" + lat + " " + lon + ")");
+		newItem.addParam(RMLMapping.SourceList.StationCoordinate.STATION_GEOMETRY, "POINT(" + lat + " " + lon + ")");
 
 		return newItem;
 	}

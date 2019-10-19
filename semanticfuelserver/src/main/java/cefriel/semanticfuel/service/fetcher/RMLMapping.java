@@ -1,6 +1,6 @@
 package cefriel.semanticfuel.service.fetcher;
 
-public final class Ontology {
+public final class RMLMapping {
 	protected final static class SourceList {
 		public static final String STATION_ID = "idImpianto";
 		public static final String STATION_OWNER = "Gestore";
