@@ -29,7 +29,7 @@
 			<artifactId>rmlmapper</artifactId>
 			<version>4.5.1</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/lib/original-rmlmapper-4.5.1-r140.jar</systemPath>
+			<systemPath>${project.basedir}/src/lib/original-rmlmapper-4.5.1-r140.jar</systemPath>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-api</artifactId>
@@ -178,6 +178,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

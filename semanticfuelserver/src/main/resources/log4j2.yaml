@@ -12,18 +12,13 @@ Configutation:
   Loggers:
 
       Root:
-        level: debug
+        level: info
         AppenderRef:
           - ref: Console_Appender
           
       logger:
         - name: org.springframework
-          level: info     
-                   
-          
-          
-             
-          
+          level: warn
+        - name: cefriel
+          level: debug 
 
-
-          

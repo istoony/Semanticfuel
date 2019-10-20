@@ -13,7 +13,57 @@ var listOfFuel = [ 'Benzina', 'Gasolio', 'Metano', 'GPL', 'Excellium Diesel',
 		'Magic Diesel', 'Blu Diesel Alpino', 'S-Diesel', 'R100', 'V-Power',
 		'V-Power Diesel', 'Benzina 100 ottani' ];
 
+var pumpExample = [ {
+
+	"flag" : "Q8",
+	"owner" : "Pinco Pallo",
+	"name" : "gianni",
+	"coordinate" : {
+		"latitude" : "45.32",
+		"longitude" : "9"
+	},
+	"address" : {
+		"address" : "via gionni 35",
+		"city" : "Milano",
+		"prov" : "MI"
+	},
+	"pumps" : [ {
+		"fuel" : "Benzina",
+		"price" : "1.9",
+		"isSelf" : "True"
+	}, {
+		"fuel" : "Benzina",
+		"price" : "0.93827453",
+		"isSelf" : "False"
+	} ]
+
+}, {
+
+	"flag" : "Q8",
+	"owner" : "Pinco Pallo",
+	"name" : "gianni",
+	"coordinate" : {
+		"latitude" : "45.5",
+		"longitude" : "9.5"
+	},
+	"address" : {
+		"address" : "via gionni 35",
+		"city" : "Milano",
+		"prov" : "MI"
+	},
+	"pumps" : [ {
+		"fuel" : "Benzina",
+		"price" : "1.912364",
+		"isSelf" : "True"
+	} ]
+
+} ];
+
 $(document).ready(function() {
+	
+	$("#refresh-button").on("click", function() {
+		location.reload(true);
+	});
 
 	$("#label-input").html('Scegli il luogo di partenza');
 
@@ -104,7 +154,7 @@ function printPlaceTable(data) {
 }
 
 function printFuelSelect() {
-	var optionList = "<option value=''>Seleziona</option>";
+	var optionList = "<option value=''>None</option>";
 	listOfFuel.forEach(function(el) {
 		optionList += "<option value='" + el + "'>" + el + "</option>";
 	});
@@ -113,12 +163,10 @@ function printFuelSelect() {
 	$("#div-fuel").removeClass('display-none');
 	$("#div-fuel").addClass('display-block');
 
-	$("#combobox").change(function() {
+	$("#fuel-form").submit(function() {
+		event.preventDefault();
 		FUEL = $("#combobox").val();
 		console.log(FUEL);
-	});
-
-	$("#combobox-submit").on("click", function() {
 		printLoadingPage();
 		$("#div-fuel").addClass('display-none');
 		$("#div-fuel").removeClass('display-block');
@@ -190,6 +238,41 @@ function printGasStationResult(data) {
 	for (i = 0; i < pathCoordinates.length; i++) {
 		latlngs.push([ pathCoordinates[i]['latitude'],
 				pathCoordinates[i]['longitude'] ]);
+	}
+
+	var greenIcon = L.icon({
+		iconUrl : 'images/fuelmarker.png',
+
+		iconSize : [ 40, 40 ], // size of the icon
+		iconAnchor : [ 22, 94 ], // point of the icon which will correspond
+		// to
+		// marker's location
+		popupAnchor : [ -3, -76 ]
+	// point from which the popup should open relative to the iconAnchor
+	});
+
+	var pumps = pumpExample; // TODO: real data
+
+	for (i = 0; i < pumps.length; i++) {
+
+		var isSelfPrice = 'Non presente';
+		var isNotSelfPrice = 'Non presente';
+
+		for (var j = 0; j < pumps[i]['pumps'].length; j++) {
+			if (pumps[i]['pumps'][j]['isSelf'] == "True") { //TODO occhio qua
+				isSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000) + "€";
+			} else {
+				isNotSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000) + "€";
+			}
+		}
+
+		var marker = L.marker(
+				[ pumps[i]['coordinate']['latitude'],
+						pumps[i]['coordinate']['longitude'] ], {
+					icon : greenIcon
+				}).addTo(map).bindPopup(
+				pumps[i]['flag'] + "<br/>SELF: " + isSelfPrice
+						+ "<br/>NON-SELF: " + isNotSelfPrice );
 	}
 
 	var polyline = L.polyline(latlngs, {

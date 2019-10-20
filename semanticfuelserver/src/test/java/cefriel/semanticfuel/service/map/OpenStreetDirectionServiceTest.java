@@ -42,11 +42,11 @@ public class OpenStreetDirectionServiceTest extends AbstractTest {
 	@Test
 	public void computeResponseTest() {
 		List<Place> startList = openStreetPlacesService.getListOfPlaces("Via Manzoni, Lecco");
-		LOG.debug("Start List = {}", startList);
+		LOG.info("Start List = {}", startList);
 		Place start = startList.get(0);
 
 		List<Place> endListList = openStreetPlacesService.getListOfPlaces("Duomo di Milano, Milano");
-		LOG.debug("End List = {}", endListList);
+		LOG.info("End List = {}", endListList);
 		Place end = endListList.get(0);
 
 		DirectionRequest request = new DirectionRequest();

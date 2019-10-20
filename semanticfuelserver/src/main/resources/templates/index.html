@@ -6,24 +6,30 @@
 	href="webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
-    <style>
-        html, body {
-            text-align: center;
-        }
-        #map {
-            height: 500px;
-            width: 700px;
-            max-width: 100%;
-            margin: auto;
-        }
-    </style>
+<style>
+html, body {
+	text-align: center;
+}
+
+#map {
+	height: 500px;
+	width: 700px;
+	max-width: 100%;
+	margin: auto;
+}
+</style>
 </head>
 
 <body>
 	<nav class="navbar navbar-inverse">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="#">Semantic Fuel</a>
+				<a class="navbar-brand" href="">Semantic Fuel</a>
+				<!-- Navbar Button -->
+			</div>
+			<div class="collapse navbar-collapse" id="exampleNavComponents">
+				<button type="button" id="refresh-button"
+					class="btn btn-default navbar-btn navbar-right">Esegui una nuova ricerca</button>
 			</div>
 		</div>
 	</nav>
@@ -39,7 +45,8 @@
 					<div class="form-group form-group-lg">
 						<label class="col-sm-3 control-label" id="label-input"></label>
 						<div class="col-sm-9">
-							<input type="text" class="form-control" id="start" />
+							<input type="text" class="form-control" id="start"
+								required="true" />
 						</div>
 					</div>
 
@@ -57,7 +64,7 @@
 						<label class="col-sm-3 control-label">Seleziona
 							carburante:</label>
 						<div class="col-sm-9">
-							<select class="form-control" id="combobox"></select>
+							<select class="form-control" id="combobox" required></select>
 						</div>
 					</div>
 					<div class="form-group">
