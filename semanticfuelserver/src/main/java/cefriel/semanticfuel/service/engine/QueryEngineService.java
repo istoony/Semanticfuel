@@ -10,7 +10,6 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.jline.utils.Log;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,10 +37,14 @@ public class QueryEngineService extends AbstractService {
 		// get the area where to search for stations
 		Geometry searchingArea = preprocesser.getPathArea(path);
 
-		// build the query
-		Query query = queryManager.buildQuery(fuel, searchingArea);
+		return getGasStaions(searchingArea, fuel);
+	}
 
-		Log.debug("Running query: \n" + query.toString());
+	public List<GasStation> getGasStaions(Geometry area, String fuel) {
+		// build the query
+		Query query = queryManager.buildQuery(fuel, area);
+
+		LOG.debug("Running query: \n" + query.toString());
 
 		Map<Integer, GasStation> gasStations = new HashMap<>();
 		try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
@@ -50,13 +53,12 @@ public class QueryEngineService extends AbstractService {
 			// run the query
 			ResultSet rs = qe.execSelect();
 
-			Log.info("Log executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds, with "
-					+ rs.getRowNumber() + " results");
+			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
 
 			// parse the result, one line per pump found (possibly multiple lines for each
 			// station)
 			while (rs.hasNext()) {
-				GasStation gs = parseGasStation(rs.next());
+				GasStation gs = parseGasStation(rs.next(), fuel);
 
 				if (gasStations.containsKey(gs.hashCode()))
 					// if the stations map already contained this station entry, just update the
@@ -68,28 +70,27 @@ public class QueryEngineService extends AbstractService {
 		}
 
 		return new ArrayList<>(gasStations.values());
+
 	}
 
-	private GasStation parseGasStation(QuerySolution queryRaw) {
-		String stationName = queryRaw.get(QueryManager.QUERY_TARGET_STATION_NAME).asLiteral().toString();
-		String stationOwner = queryRaw.get(QueryManager.QUERY_TARGET_STATION_OWNER).asLiteral().toString();
-		String stationType = queryRaw.get(QueryManager.QUERY_TARGET_STATION_TYPE).asLiteral().toString();
-		String stationFlag = queryRaw.get(QueryManager.QUERY_TARGET_STATION_FLAG).asLiteral().toString();
-		String stationAddress = queryRaw.get(QueryManager.QUERY_TARGET_STATION_ADDRESS).asLiteral().toString();
-		String stationCity = queryRaw.get(QueryManager.QUERY_TARGET_STATION_CITY).asLiteral().toString();
-		String stationProvince = queryRaw.get(QueryManager.QUERY_TARGET_STATION_PROVINCE).asLiteral().toString();
-		String stationPumpFuelPrice = queryRaw.get(QueryManager.QUERY_TARGET_FUEL_PRICE).asLiteral().toString();
-		String stationPumpService = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_TOS).asLiteral().toString();
-		String stationPumpFuel = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_FUEL).asLiteral().toString();
-		String stationLat = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LAT).asLiteral().toString();
-		String stationLong = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LONG).asLiteral().toString();
+	private GasStation parseGasStation(QuerySolution queryRaw, String fuel) {
+		String stationName = queryRaw.get(QueryManager.QUERY_TARGET_STATION_NAME).asLiteral().getString();
+		String stationOwner = queryRaw.get(QueryManager.QUERY_TARGET_STATION_OWNER).asLiteral().getString();
+		String stationType = queryRaw.get(QueryManager.QUERY_TARGET_STATION_TYPE).asLiteral().getString();
+		String stationFlag = queryRaw.get(QueryManager.QUERY_TARGET_STATION_FLAG).asLiteral().getString();
+		String stationAddress = queryRaw.get(QueryManager.QUERY_TARGET_STATION_ADDRESS).asLiteral().getString();
+		String stationCity = queryRaw.get(QueryManager.QUERY_TARGET_STATION_CITY).asLiteral().getString();
+		String stationProvince = queryRaw.get(QueryManager.QUERY_TARGET_STATION_PROVINCE).asLiteral().getString();
+		double stationPumpFuelPrice = queryRaw.get(QueryManager.QUERY_TARGET_FUEL_PRICE).asLiteral().getDouble();
+		boolean stationPumpService = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_TOS).asLiteral().getBoolean();
+		double stationLat = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LAT).asLiteral().getDouble();
+		double stationLong = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LONG).asLiteral().getDouble();
 
 		StationBuilder builder = new StationBuilder();
 		builder.setName(stationName).setFlag(stationFlag).setOwner(stationOwner).setType(stationType)
-				.setCoordinate(new Point(Double.parseDouble(stationLat), Double.parseDouble(stationLong)))
+				.setCoordinate(new Point(stationLat, stationLong))
 				.setAddress(new Address(stationAddress, stationCity, stationProvince))
-				.addPump(new FuelPump(stationPumpFuel, Double.parseDouble(stationPumpFuelPrice),
-						Boolean.parseBoolean(stationPumpService)));
+				.addPump(new FuelPump(fuel, stationPumpFuelPrice, stationPumpService));
 		return builder.build();
 	}
 }

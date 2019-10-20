@@ -36,7 +36,6 @@ public class QueryManager extends AbstractService {
 	protected static final String QUERY_TARGET_PUMP_TOS = "isself";
 	protected static final String QUERY_TARGET_STATION_LAT = "lat";
 	protected static final String QUERY_TARGET_STATION_LONG = "long";
-	protected static final String QUERY_TARGET_PUMP_FUEL = "fuel";
 
 	private static final String QUERY_PARAM_FUEL = "fuelParam";
 	private static final String QUERY_PARAM_AREA = "areaParam";
@@ -64,7 +63,7 @@ public class QueryManager extends AbstractService {
 				+ QUERY_TARGET_STATION_CITY + " ?" + QUERY_TARGET_STATION_FLAG + " ?" + QUERY_TARGET_STATION_LAT + " ?"
 				+ QUERY_TARGET_STATION_LONG + " ?" + QUERY_TARGET_STATION_OWNER + " ?" + QUERY_TARGET_STATION_OWNER
 				+ " ?" + QUERY_TARGET_FUEL_PRICE + " ?" + QUERY_TARGET_STATION_PROVINCE + " ?" + QUERY_TARGET_PUMP_TOS
-				+ " ?" + QUERY_TARGET_STATION_TYPE + " ?" + QUERY_TARGET_PUMP_FUEL;
+				+ " ?" + QUERY_TARGET_STATION_TYPE;
 		// clauses
 		query += " WHERE {";
 		// station attributes
@@ -77,9 +76,8 @@ public class QueryManager extends AbstractService {
 				+ QUERY_TARGET_STATION_CITY + " . " + QUERY_VAR_ADDRESS + " gso:prov ?" + QUERY_TARGET_STATION_PROVINCE;
 		// station pumps
 		query += " . " + QUERY_VAR_STATION + " gso:has_pump " + QUERY_VAR_PUMP + " . " + QUERY_VAR_PUMP + " gso:fuel ?"
-				+ QUERY_TARGET_PUMP_FUEL + " . " + QUERY_VAR_PUMP + " gso:is_self ?" + QUERY_TARGET_PUMP_TOS + " . "
+				+ QUERY_PARAM_FUEL + " . " + QUERY_VAR_PUMP + " gso:is_self ?" + QUERY_TARGET_PUMP_TOS + " . "
 				+ QUERY_VAR_PUMP + " gso:price ?" + QUERY_TARGET_FUEL_PRICE;
-		query += " . FILTER(bif:contains(?" + QUERY_TARGET_PUMP_FUEL + ", ?" + QUERY_PARAM_FUEL + "))";
 		// station location
 		query += " . " + QUERY_VAR_STATION + " wgs84_pos:location " + QUERY_VAR_LOCATION + " . " + QUERY_VAR_LOCATION
 				+ " wgs84_pos:lat ?" + QUERY_TARGET_STATION_LAT + " . " + QUERY_VAR_LOCATION + " wgs84_pos:long ?"

@@ -45,7 +45,8 @@ public class FetcherService extends AbstractService {
 	private final static String TARGET_PRICE = "preprocessed_prices.csv";
 	private final static String TARGET_LIST = "preprocessed_list.csv";
 
-	private final static String PATH_TO_MODEL = "src" + File.separator + "main" + File.separator + "model";
+	private final long minMillisFromPrevSession = 40 * 60 * 1000;
+	private long previousFetchingSessionTime;
 
 	@Autowired
 	private ModelKeeperService modelManager;
@@ -53,9 +54,13 @@ public class FetcherService extends AbstractService {
 	/**
 	 * Fetch data from the two MISE's sources every day at 8:30 AM.
 	 */
-//	@Scheduled(cron = "0 30 8 * * *")
-	@Scheduled(fixedRate = 60000)
+	@Scheduled(cron = "0 30 8 * * *")
+	// @Scheduled(fixedRate = 60000)
 	public void fetch() {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - previousFetchingSessionTime < minMillisFromPrevSession)
+			return;
+
 		Log.info("Fetching ontology updates...");
 		long fetchingStart = System.currentTimeMillis();
 
@@ -94,10 +99,8 @@ public class FetcherService extends AbstractService {
 
 		Log.info("Updates fetched in " + ((System.currentTimeMillis() - fetchingStart) / 1000) + " seconds");
 
-		new File(PATH_TO_MODEL).mkdirs();
-
 		// update the ontology in memory
-		modelManager.updateOntology(PATH_TO_MODEL);
+		modelManager.updateOntology();
 	}
 
 	/**
