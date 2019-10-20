@@ -60,6 +60,10 @@ var pumpExample = [ {
 } ];
 
 $(document).ready(function() {
+	
+	$("#refresh-button").on("click", function() {
+		location.reload(true);
+	});
 
 	$("#label-input").html('Scegli il luogo di partenza');
 
