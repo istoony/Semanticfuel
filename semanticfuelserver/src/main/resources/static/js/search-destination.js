@@ -14,7 +14,7 @@ var listOfFuel = [ 'Benzina', 'Gasolio', 'Metano', 'GPL', 'Excellium Diesel',
 		'V-Power Diesel', 'Benzina 100 ottani' ];
 
 $(document).ready(function() {
-	
+
 	$("#refresh-button").on("click", function() {
 		location.reload(true);
 	});
@@ -194,16 +194,13 @@ function printGasStationResult(data) {
 				pathCoordinates[i]['longitude'] ]);
 	}
 
-	var greenIcon = L.icon({
-		iconUrl : 'images/fuelmarker.png',
-
-		iconSize : [ 40, 40 ], // size of the icon
-		iconAnchor : [ 20, 40 ], // point of the icon which will correspond
-		// to
-		// marker's location
-		popupAnchor : [ -3, -76 ]
-	// point from which the popup should open relative to the iconAnchor
-	});
+	var greenIcon = L
+			.icon({
+				iconUrl : 'https://raw.githubusercontent.com/iconic/open-iconic/master/png/map-marker-8x.png',
+				iconSize : [ 32, 32 ],
+				iconAnchor : [ 16, 32 ],
+				popupAnchor : [ -3, -76 ]
+			});
 
 	var pumps = data['gasStations'];
 
@@ -213,10 +210,13 @@ function printGasStationResult(data) {
 		var isNotSelfPrice = 'Non presente';
 
 		for (var j = 0; j < pumps[i]['pumps'].length; j++) {
-			if (pumps[i]['pumps'][j]['isSelf'] == "True") { //TODO occhio qua
-				isSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000) + "€";
+			if (pumps[i]['pumps'][j]['isSelf'] == "True") { // TODO occhio qua
+				isSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000)
+						+ "€";
 			} else {
-				isNotSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000) + "€";
+				isNotSelfPrice = (Math
+						.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000)
+						+ "€";
 			}
 		}
 
@@ -226,7 +226,7 @@ function printGasStationResult(data) {
 					icon : greenIcon
 				}).addTo(map).bindPopup(
 				pumps[i]['flag'] + "<br/>SELF: " + isSelfPrice
-						+ "<br/>NON-SELF: " + isNotSelfPrice );
+						+ "<br/>NON-SELF: " + isNotSelfPrice);
 	}
 
 	var polyline = L.polyline(latlngs, {
