@@ -46,10 +46,10 @@ public class QueryEngineService extends AbstractService {
 		return getGasStaions(searchingArea, fuel);
 	}
 
-	public List<GasStation> getGasStaions(List<Polygon> area, String fuel) {
+	private List<GasStation> getGasStaions(List<Polygon> area, String fuel) {
 		Set<GasStation> result = new HashSet<>();
 
-		List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 3);
+		List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 2);
 
 		for (Geometry geom : geometries) {
 			// build the query

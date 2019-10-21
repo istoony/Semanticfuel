@@ -2,8 +2,6 @@ package cefriel.semanticfuel.service.engine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Polygon;
@@ -17,17 +15,17 @@ import cefriel.semanticfuel.service.AbstractService;
 public class PathProcessor extends AbstractService {
 
 	public List<Polygon> getPathArea(List<Point> path) {
-		List<Point> samples = filterByIndex(path, 40);
+		List<Point> samples = filterByDistance(path, 1000);
 		return computePoligons(samples);
 
 	}
 
 	private List<Polygon> computePoligons(List<Point> points) {
 		List<Polygon> result = new ArrayList<>();
-			
+
 		for (int i = 1; i < points.size(); i++) {
 			GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
-			shapeFactory.setNumPoints(8);	
+			shapeFactory.setNumPoints(8);
 
 			Point p1 = points.get(i - 1);
 			Point p2 = points.get(i);
@@ -51,65 +49,29 @@ public class PathProcessor extends AbstractService {
 		return result;
 	}
 
+	private List<Point> filterByDistance(List<Point> pointList, double distance) {
+		double currentDistance = 0;
 
-
-	private List<Point> filterBySlope(List<Point> pointList, double slopeTollerance) {
 		List<Point> result = new ArrayList<>();
+		result.add(pointList.get(0));
+		for (int i = 0; i < pointList.size() - 1; i++) {
+			Point p1 = pointList.get(i);
+			Point p2 = pointList.get(i + 1);
 
-		double currentSlope = computeSlope(pointList.get(0), pointList.get(1));
-		Point currentPoint = pointList.get(0);
+			double p12 = computeDistance(p1, p2);
 
-		for (int i = 1; i < pointList.size(); i++) {
-			Point p = pointList.get(i);
+			currentDistance += p12;
+			if (currentDistance > distance) {
+				result.add(p2);
 
-			double slope = computeSlope(currentPoint, p);
-
-			if (Math.abs(slope - currentSlope) > slopeTollerance) {
-				result.add(p);
-
-				currentPoint = p;
-				currentSlope = computeSlope(pointList.get(i - 1), p);
-			} else
-				currentSlope = slope;
+				currentDistance = 0;
+			}
 		}
 		if (!result.get(result.size() - 1).equals(pointList.get(pointList.size() - 1)))
 			result.add(pointList.get(pointList.size() - 1));
 
 		return result;
 
-	}
-
-//	private List<Point> filterByDistance(List<Point> pointList, double distance) {
-//		double currentDistance = 0;
-//
-//		List<Point> result = new ArrayList<>();
-//		result.add(pointList.get(0));
-//		for (int i = 0; i < pointList.size() - 1; i++) {
-//			Point p1 = pointList.get(i);
-//			Point p2 = pointList.get(i + 1);
-//
-//			double p12 = computeDistance(p1, p2);
-//
-//			currentDistance += p12;
-//			if (currentDistance > distance) {
-//				result.add(p2);
-//
-//				currentDistance = 0;
-//			}
-//		}
-//		if (!result.get(result.size() - 1).equals(pointList.get(pointList.size() - 1)))
-//			result.add(pointList.get(pointList.size() - 1));
-//
-//		return result;
-//
-//	}
-
-	private List<Point> filterByIndex(List<Point> pointList, int rate) {
-		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % rate == 0)
-				.mapToObj(e -> pointList.get(e)).collect(Collectors.toList());
-		if (pointList.size() % rate != 0)
-			result.add(pointList.get(pointList.size() - 1));
-		return result;
 	}
 
 	private Double computeDistance(Point p1, Point p2) {
@@ -128,15 +90,4 @@ public class PathProcessor extends AbstractService {
 
 		return d;
 	}
-
-	private double computeSlope(Point p1, Point p2) {
-		double y1 = p1.getLatitude();
-		double x1 = p1.getLongitude();
-
-		double y2 = p2.getLatitude();
-		double x2 = p2.getLongitude();
-
-		return (y2 - y1) / (x2 - x1);
-	}
-
 }
