@@ -25,12 +25,15 @@ public class GeometryBuilder extends AbstractService {
 		int n = polygons.size() / maxsize;
 
 		List<List<Polygon>> polygonLists = new ArrayList<>();
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < n; i++) {
 			polygonLists.add(new ArrayList<>());
+		}
 
-		for (int i = 0; i < n; i++)
-			for (int j = 0; j < maxsize; j++)
+		for (int j = 0; j < maxsize; j++) {
+			for (int i = 0; i < n; i++) {
 				polygonLists.get(i).add(polygons.get(i * maxsize + j));
+			}
+		}
 		if (polygons.size() % maxsize != 0) {
 			for (int i = 0; i < polygons.size() % maxsize; i++) {
 				polygonLists.add(new ArrayList<>());

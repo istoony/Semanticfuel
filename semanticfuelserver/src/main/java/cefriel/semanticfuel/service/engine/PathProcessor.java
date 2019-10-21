@@ -15,7 +15,7 @@ import cefriel.semanticfuel.service.AbstractService;
 public class PathProcessor extends AbstractService {
 
 	public List<Polygon> getPathArea(List<Point> path) {
-		List<Point> samples = filterByDistance(path, 1000);
+		List<Point> samples = filterByDistance(path, 1300);
 		return computePoligons(samples);
 
 	}
