@@ -2,8 +2,10 @@ package cefriel.semanticfuel.service.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -12,6 +14,8 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,7 @@ import cefriel.semanticfuel.model.GasStation.StationBuilder;
 import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.AbstractService;
 import cefriel.semanticfuel.service.fetcher.ModelKeeperService;
+import cefriel.semanticfuel.utils.geo.GeometryBuilder;
 
 @Service
 public class QueryEngineService extends AbstractService {
@@ -31,43 +36,54 @@ public class QueryEngineService extends AbstractService {
 	@Autowired
 	private PathProcessor preprocesser;
 
+	@Autowired
+	private GeometryBuilder geometryBuilder;
+
 	public List<GasStation> getGasStations(List<Point> path, String fuel) {
 		// get the area where to search for stations
-		Geometry searchingArea = preprocesser.getPathArea(path);
+		List<Polygon> searchingArea = preprocesser.getPathArea(path);
 
 		return getGasStaions(searchingArea, fuel);
 	}
 
-	public List<GasStation> getGasStaions(Geometry area, String fuel) {
-		// build the query
-		Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, area);
+	public List<GasStation> getGasStaions(List<Polygon> area, String fuel) {
+		Set<GasStation> result = new HashSet<>();
 
-		LOG.debug("Running query: \n" + query.toString());
+		List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 3);
 
-		Map<Integer, GasStation> gasStations = new HashMap<>();
-		try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
-			long queryStart = System.currentTimeMillis();
+		for (Geometry geom : geometries) {
+			// build the query
+			Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, geom);
 
-			// run the query
-			ResultSet rs = qe.execSelect();
+			LOG.debug("Running query: \n" + query.toString());
 
-			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
+			Map<Integer, GasStation> gasStations = new HashMap<>();
+			try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
+				long queryStart = System.currentTimeMillis();
 
-			// parse the result, one line per pump found (possibly multiple lines for each
-			// station)
-			while (rs.hasNext()) {
-				GasStation gs = parseGasStation(rs.next(), fuel);
+				// run the query
+				ResultSet rs = qe.execSelect();
 
-				if (gasStations.containsKey(gs.hashCode()))
-					// if the stations map already contained this station entry, just update the
-					// pump list
-					gasStations.get(gs.hashCode()).addPumps(gs.getPumps());
-				else
-					gasStations.put(gs.hashCode(), gs);
+				LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
+
+				// parse the result, one line per pump found (possibly multiple lines for each
+				// station)
+				while (rs.hasNext()) {
+					GasStation gs = parseGasStation(rs.next(), fuel);
+
+					if (gasStations.containsKey(gs.hashCode()))
+						// if the stations map already contained this station entry, just update the
+						// pump list
+						gasStations.get(gs.hashCode()).addPumps(gs.getPumps());
+					else
+						gasStations.put(gs.hashCode(), gs);
+				}
 			}
+
+			result.addAll(gasStations.values());
 		}
-		LOG.debug("Result: {}", gasStations);
-		return new ArrayList<>(gasStations.values());
+
+		return new ArrayList<>(result);
 
 	}
 

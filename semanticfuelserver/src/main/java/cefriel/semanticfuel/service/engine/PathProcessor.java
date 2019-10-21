@@ -6,9 +6,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.util.GeometricShapeFactory;
 import org.springframework.stereotype.Service;
@@ -19,14 +16,13 @@ import cefriel.semanticfuel.service.AbstractService;
 @Service
 public class PathProcessor extends AbstractService {
 
-	public Geometry getPathArea(List<Point> path) {
+	public List<Polygon> getPathArea(List<Point> path) {
 		List<Point> samples = filterByIndex(path, 40);
 		return computePoligons(samples.subList(0, 1));
 	}
 
-	private MultiPolygon computePoligons(List<Point> points) {
+	private List<Polygon> computePoligons(List<Point> points) {
 		List<Polygon> result = new ArrayList<>();
-		GeometryFactory factory = new GeometryFactory();
 
 		GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
 		shapeFactory.setNumPoints(6);
@@ -46,9 +42,8 @@ public class PathProcessor extends AbstractService {
 
 			result.add(shapeFactory.createCircle());
 		}
-		MultiPolygon multiPoligon = new MultiPolygon(result.toArray(new Polygon[result.size()]), factory);
-		LOG.debug("Multipoligon = {}", multiPoligon);
-		return multiPoligon;
+
+		return result;
 	}
 
 	private List<Point> computeRectanglesPath(List<Point> reducedList, Double L) {
