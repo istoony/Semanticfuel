@@ -2,8 +2,6 @@ package cefriel.semanticfuel.service.engine;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +17,15 @@ public class PathProcessor extends AbstractService {
 	private GeometryBuilder geometryFactory;
 
 	public List<Polygon> getPathArea(List<Point> path) {
-		List<Point> samples = filterByIndex(path, 40);
-		return computePoligons(samples.subList(0, 1));
+		List<Point> samples = filterByDistance(path, 1300);
+		return computePoligons(samples);
+
 	}
 
 	private List<Polygon> computePoligons(List<Point> points) {
 		List<Polygon> result = new ArrayList<>();
 
 		for (int i = 1; i < points.size(); i++) {
-
 			Point p1 = points.get(i - 1);
 			Point p2 = points.get(i);
 
@@ -36,40 +34,15 @@ public class PathProcessor extends AbstractService {
 					(p1.getLongitude() + p2.getLongitude()) / 2);
 
 			result.add(geometryFactory.createCircle(6, center, diameter));
+
 		}
 
 		return result;
-	}
-
-	private List<Point> filterBySlope(List<Point> pointList, double slopeTollerance) {
-		List<Point> result = new ArrayList<>();
-
-		double currentSlope = GeoUtils.computeSlope(pointList.get(0), pointList.get(1));
-		Point currentPoint = pointList.get(0);
-
-		for (int i = 1; i < pointList.size(); i++) {
-			Point p = pointList.get(i);
-
-			double slope = GeoUtils.computeSlope(currentPoint, p);
-
-			if (Math.abs(slope - currentSlope) > slopeTollerance) {
-				result.add(p);
-
-				currentPoint = p;
-				currentSlope = GeoUtils.computeSlope(pointList.get(i - 1), p);
-			} else
-				currentSlope = slope;
-		}
-		if (!result.get(result.size() - 1).equals(pointList.get(pointList.size() - 1)))
-			result.add(pointList.get(pointList.size() - 1));
-
-		return result;
-
 	}
 
 	private List<Point> filterByDistance(List<Point> pointList, double distance) {
 		double currentDistance = 0;
-
+		LOG.info("Iniztial Size: {}", pointList.size());
 		List<Point> result = new ArrayList<>();
 		result.add(pointList.get(0));
 		for (int i = 0; i < pointList.size() - 1; i++) {
@@ -87,17 +60,9 @@ public class PathProcessor extends AbstractService {
 		}
 		if (!result.get(result.size() - 1).equals(pointList.get(pointList.size() - 1)))
 			result.add(pointList.get(pointList.size() - 1));
-
+		LOG.info("Final Size: {}", result.size());
 		return result;
 
-	}
-
-	private List<Point> filterByIndex(List<Point> pointList, int rate) {
-		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % rate == 0)
-				.mapToObj(e -> pointList.get(e)).collect(Collectors.toList());
-		if (pointList.size() % rate != 0)
-			result.add(pointList.get(pointList.size() - 1));
-		return result;
 	}
 
 }

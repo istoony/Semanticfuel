@@ -16,7 +16,6 @@ import cefriel.semanticfuel.service.mapdao.OpenStreetDirectionDao;
 @Service
 public class OpenStreetDirectionService extends AbstractService {
 
-	private static final double L = 0.0001;
 	@Autowired
 	private OpenStreetDirectionDao openStreetDirectionDao;
 
