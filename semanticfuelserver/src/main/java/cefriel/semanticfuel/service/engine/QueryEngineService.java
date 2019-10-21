@@ -26,7 +26,6 @@ import cefriel.semanticfuel.model.GasStation.StationBuilder;
 import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.AbstractService;
 import cefriel.semanticfuel.service.fetcher.ModelKeeperService;
-import cefriel.semanticfuel.utils.geo.GeometryBuilder;
 
 @Service
 public class QueryEngineService extends AbstractService {
