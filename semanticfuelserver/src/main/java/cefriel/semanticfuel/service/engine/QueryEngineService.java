@@ -2,15 +2,20 @@ package cefriel.semanticfuel.service.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.RDFNode;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +26,7 @@ import cefriel.semanticfuel.model.GasStation.StationBuilder;
 import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.service.AbstractService;
 import cefriel.semanticfuel.service.fetcher.ModelKeeperService;
+import cefriel.semanticfuel.utils.geo.GeometryBuilder;
 
 @Service
 public class QueryEngineService extends AbstractService {
@@ -28,69 +34,91 @@ public class QueryEngineService extends AbstractService {
 	private ModelKeeperService modelManager;
 
 	@Autowired
-	private QueryManager queryManager;
+	private PathProcessor preprocesser;
 
 	@Autowired
-	private PathProcessor preprocesser;
+	private GeometryBuilder geometryBuilder;
 
 	public List<GasStation> getGasStations(List<Point> path, String fuel) {
 		// get the area where to search for stations
-		Geometry searchingArea = preprocesser.getPathArea(path);
+		List<Polygon> searchingArea = preprocesser.getPathArea(path);
 
 		return getGasStaions(searchingArea, fuel);
 	}
 
-	public List<GasStation> getGasStaions(Geometry area, String fuel) {
-		// build the query
-		Query query = queryManager.buildQuery(fuel, area);
+	public List<GasStation> getGasStaions(List<Polygon> area, String fuel) {
+		Set<GasStation> result = new HashSet<>();
 
-		LOG.debug("Running query: \n" + query.toString());
+		List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 3);
 
-		Map<Integer, GasStation> gasStations = new HashMap<>();
-		try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
-			long queryStart = System.currentTimeMillis();
+		for (Geometry geom : geometries) {
+			// build the query
+			Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, geom);
 
-			// run the query
-			ResultSet rs = qe.execSelect();
+			LOG.debug("Running query: \n" + query.toString());
 
-			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
+			Map<Integer, GasStation> gasStations = new HashMap<>();
+			try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
+				long queryStart = System.currentTimeMillis();
 
-			// parse the result, one line per pump found (possibly multiple lines for each
-			// station)
-			while (rs.hasNext()) {
-				GasStation gs = parseGasStation(rs.next(), fuel);
+				// run the query
+				ResultSet rs = qe.execSelect();
 
-				if (gasStations.containsKey(gs.hashCode()))
-					// if the stations map already contained this station entry, just update the
-					// pump list
-					gasStations.get(gs.hashCode()).addPumps(gs.getPumps());
-				else
-					gasStations.put(gs.hashCode(), gs);
+				LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
+
+				// parse the result, one line per pump found (possibly multiple lines for each
+				// station)
+				while (rs.hasNext()) {
+					GasStation gs = parseGasStation(rs.next(), fuel);
+
+					if (gasStations.containsKey(gs.hashCode()))
+						// if the stations map already contained this station entry, just update the
+						// pump list
+						gasStations.get(gs.hashCode()).addPumps(gs.getPumps());
+					else
+						gasStations.put(gs.hashCode(), gs);
+				}
 			}
+
+			result.addAll(gasStations.values());
 		}
-		LOG.debug("Result: {}", gasStations);
-		return new ArrayList<>(gasStations.values());
+
+		return new ArrayList<>(result);
 
 	}
 
 	private GasStation parseGasStation(QuerySolution queryRaw, String fuel) {
-		String stationName = queryRaw.get(QueryManager.QUERY_TARGET_STATION_NAME).asLiteral().getString();
-		String stationOwner = queryRaw.get(QueryManager.QUERY_TARGET_STATION_OWNER).asLiteral().getString();
-		String stationType = queryRaw.get(QueryManager.QUERY_TARGET_STATION_TYPE).asLiteral().getString();
-		String stationFlag = queryRaw.get(QueryManager.QUERY_TARGET_STATION_FLAG).asLiteral().getString();
-		String stationAddress = queryRaw.get(QueryManager.QUERY_TARGET_STATION_ADDRESS).asLiteral().getString();
-		String stationCity = queryRaw.get(QueryManager.QUERY_TARGET_STATION_CITY).asLiteral().getString();
-		String stationProvince = queryRaw.get(QueryManager.QUERY_TARGET_STATION_PROVINCE).asLiteral().getString();
-		double stationPumpFuelPrice = queryRaw.get(QueryManager.QUERY_TARGET_FUEL_PRICE).asLiteral().getDouble();
-		boolean stationPumpService = queryRaw.get(QueryManager.QUERY_TARGET_PUMP_TOS).asLiteral().getBoolean();
-		double stationLat = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LAT).asLiteral().getDouble();
-		double stationLong = queryRaw.get(QueryManager.QUERY_TARGET_STATION_LONG).asLiteral().getDouble();
+		RDFNode stationName = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_NAME);
+		RDFNode stationOwner = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_OWNER);
+		RDFNode stationType = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_TYPE);
+		RDFNode stationFlag = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_FLAG);
+		RDFNode stationAddress = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_ADDRESS);
+		RDFNode stationCity = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_CITY);
+		RDFNode stationProvince = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_PROVINCE);
+		RDFNode stationPumpFuelPrice = queryRaw.get(QueryBuilder.QUERY_TARGET_FUEL_PRICE);
+		RDFNode stationPumpService = queryRaw.get(QueryBuilder.QUERY_TARGET_PUMP_TOS);
+		RDFNode stationLat = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_LAT);
+		RDFNode stationLong = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_LONG);
 
 		StationBuilder builder = new StationBuilder();
-		builder.setName(stationName).setFlag(stationFlag).setOwner(stationOwner).setType(stationType)
-				.setCoordinate(new Point(stationLat, stationLong))
-				.setAddress(new Address(stationAddress, stationCity, stationProvince))
-				.addPump(new FuelPump(fuel, stationPumpFuelPrice, stationPumpService));
+		if (stationName != null)
+			builder.setName(stationName.asLiteral().getString());
+		if (stationFlag != null)
+			builder.setFlag(stationFlag.asLiteral().getString());
+		if (stationOwner != null)
+			builder.setOwner(stationOwner.asLiteral().getString());
+		if (stationType != null)
+			builder.setType(stationType.asLiteral().getString());
+		if (stationLat != null && stationLong != null)
+			builder.setCoordinate(new Point(stationLat.asLiteral().getDouble(), stationLong.asLiteral().getDouble()));
+		String address = stationAddress != null ? stationAddress.asLiteral().getString() : null;
+		String province = stationProvince != null ? stationProvince.asLiteral().getString() : null;
+		String city = stationCity != null ? stationCity.asLiteral().getString() : null;
+		builder.setAddress(new Address(address, city, province));
+		boolean service = stationPumpService != null ? stationPumpService.asLiteral().getBoolean() : false;
+		double price = stationPumpFuelPrice != null ? stationPumpFuelPrice.asLiteral().getDouble() : 0;
+		builder.addPump(new FuelPump(fuel, price, service));
+
 		return builder.build();
 	}
 }

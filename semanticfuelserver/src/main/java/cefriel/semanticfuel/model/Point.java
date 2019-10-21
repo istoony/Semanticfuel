@@ -38,4 +38,13 @@ public class Point {
 	public int hashCode() {
 		return new HashCodeBuilder().append(latitude).append(longitude).toHashCode();
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Point))
+			return false;
+
+		Point other = (Point) o;
+		return longitude.equals(other.longitude) && latitude.equals(other.latitude);
+	}
 }

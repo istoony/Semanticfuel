@@ -32,7 +32,6 @@ public class QueryEngineServiceTest extends AbstractTest {
 	@Autowired
 	private OpenStreetDirectionDao directionService;
 
-	
 	@Test
 	public void getGasStationsFromPolygon() {
 		GeometryFactory gf = new GeometryFactory();
@@ -59,7 +58,6 @@ public class QueryEngineServiceTest extends AbstractTest {
 		assertTrue(!stations.isEmpty());
 	}
 
-	
 	@Test
 	public void getGasStationsFromMultipolygonTest() {
 		// somewhere near Pertengo (Vercelli)
@@ -90,7 +88,7 @@ public class QueryEngineServiceTest extends AbstractTest {
 		// number of polygons per multipolygon (all of the same size, sampled from the
 		// list created above)
 		int[] geometrySize = new int[] { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
-		geometrySize = new int[] { 10 };
+		geometrySize = new int[] { 50, 100, 150, 200 };
 
 		for (int size : geometrySize) {
 			List<Geometry> subPolygons = new ArrayList<>();
@@ -146,7 +144,7 @@ public class QueryEngineServiceTest extends AbstractTest {
 		// number of polygons per multipolygon (all of the same size, sampled from the
 		// list created above)
 		int[] geometrySize = new int[] { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
-	//	geometrySize = new int[] { 10 };
+		// geometrySize = new int[] { 10 };
 
 		for (int size : geometrySize) {
 			List<Geometry> subPolygons = new ArrayList<>();
