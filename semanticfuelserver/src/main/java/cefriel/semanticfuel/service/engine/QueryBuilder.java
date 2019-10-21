@@ -39,6 +39,11 @@ public class QueryBuilder extends AbstractService {
 	protected static final String QUERY_TARGET_STATION_LAT = "lat";
 	protected static final String QUERY_TARGET_STATION_LONG = "long";
 
+	protected static final String QUERY_TARGET_GROUP_STATION = "station";
+	protected static final String QUERY_TARGET_GROUP_LOCATION = "location";
+	protected static final String QUERY_TARGET_GROUP_ADDRESS = "address";
+	protected static final String QUERY_TARGET_GROUP_PUMP = "pump";
+
 	private static final String QUERY_PARAM_FUEL = "fuelParam";
 	private static final String QUERY_PARAM_AREA = "areaParam";
 
@@ -110,6 +115,40 @@ public class QueryBuilder extends AbstractService {
 					"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>" + target.toString());
 
 		return paramString.asQuery();
+	}
+
+	public QueryBuilder addAllTarget() {
+		addTargetGroup(QUERY_TARGET_GROUP_STATION);
+		addTargetGroup(QUERY_TARGET_GROUP_ADDRESS);
+		addTargetGroup(QUERY_TARGET_GROUP_LOCATION);
+		addTargetGroup(QUERY_TARGET_GROUP_PUMP);
+
+		return this;
+	}
+
+	public QueryBuilder addTargetGroup(String group) {
+		switch (group) {
+		case QUERY_TARGET_GROUP_ADDRESS:
+			addTarget(QUERY_TARGET_STATION_ADDRESS);
+			addTarget(QUERY_TARGET_STATION_CITY);
+			addTarget(QUERY_TARGET_STATION_PROVINCE);
+			break;
+		case QUERY_TARGET_GROUP_LOCATION:
+			addTarget(QUERY_TARGET_STATION_LAT);
+			addTarget(QUERY_TARGET_STATION_LONG);
+			break;
+		case QUERY_TARGET_GROUP_PUMP:
+			addTarget(QUERY_TARGET_PUMP_TOS);
+			addTarget(QUERY_TARGET_FUEL_PRICE);
+			break;
+		case QUERY_TARGET_GROUP_STATION:
+			addTarget(QUERY_TARGET_STATION_NAME);
+			addTarget(QUERY_TARGET_STATION_OWNER);
+			addTarget(QUERY_TARGET_STATION_FLAG);
+			addTarget(QUERY_TARGET_STATION_TYPE);
+		}
+
+		return this;
 	}
 
 	public QueryBuilder addTarget(String target) {

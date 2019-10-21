@@ -70,7 +70,7 @@ public class PathProcessor extends AbstractService {
 			double x1 = reducedList.get(i - 1).getLongitude();
 
 			double y2 = reducedList.get(i).getLatitude();
-			double x2 = reducedList.get(1).getLongitude();
+			double x2 = reducedList.get(i).getLongitude();
 
 			double m = (y2 - y1) / (x2 - x1);
 			double m2 = -1 / m;
@@ -102,8 +102,19 @@ public class PathProcessor extends AbstractService {
 		return result;
 	}
 
-	private List<Point> getSamplesFromPath(List<Point> pointList) {
-		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % 40 == 0)
+	private List<Point> filterByDistance(List<Point> pointList, double distance) {
+		double currentDistance = 0;
+
+		List<Point> result = new ArrayList<>();
+
+		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % rate == 0)
+				.mapToObj(e -> pointList.get(e)).collect(Collectors.toList());
+		result.add(pointList.get(pointList.size() - 1));
+		return result;
+	}
+
+	private List<Point> filterByIndex(List<Point> pointList, int rate) {
+		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % rate == 0)
 				.mapToObj(e -> pointList.get(e)).collect(Collectors.toList());
 		result.add(pointList.get(pointList.size() - 1));
 		return result;
