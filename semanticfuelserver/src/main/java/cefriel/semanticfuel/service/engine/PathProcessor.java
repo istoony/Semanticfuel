@@ -51,7 +51,7 @@ public class PathProcessor extends AbstractService {
 
 	private List<Point> filterByDistance(List<Point> pointList, double distance) {
 		double currentDistance = 0;
-
+		LOG.info("Iniztial Size: {}", pointList.size());
 		List<Point> result = new ArrayList<>();
 		result.add(pointList.get(0));
 		for (int i = 0; i < pointList.size() - 1; i++) {
@@ -69,7 +69,7 @@ public class PathProcessor extends AbstractService {
 		}
 		if (!result.get(result.size() - 1).equals(pointList.get(pointList.size() - 1)))
 			result.add(pointList.get(pointList.size() - 1));
-
+		LOG.info("Final Size: {}", result.size());
 		return result;
 
 	}
