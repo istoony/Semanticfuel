@@ -13,52 +13,6 @@ var listOfFuel = [ 'Benzina', 'Gasolio', 'Metano', 'GPL', 'Excellium Diesel',
 		'Magic Diesel', 'Blu Diesel Alpino', 'S-Diesel', 'R100', 'V-Power',
 		'V-Power Diesel', 'Benzina 100 ottani' ];
 
-var pumpExample = [ {
-
-	"flag" : "Q8",
-	"owner" : "Pinco Pallo",
-	"name" : "gianni",
-	"coordinate" : {
-		"latitude" : "45.32",
-		"longitude" : "9"
-	},
-	"address" : {
-		"address" : "via gionni 35",
-		"city" : "Milano",
-		"prov" : "MI"
-	},
-	"pumps" : [ {
-		"fuel" : "Benzina",
-		"price" : "1.9",
-		"isSelf" : "True"
-	}, {
-		"fuel" : "Benzina",
-		"price" : "0.93827453",
-		"isSelf" : "False"
-	} ]
-
-}, {
-
-	"flag" : "Q8",
-	"owner" : "Pinco Pallo",
-	"name" : "gianni",
-	"coordinate" : {
-		"latitude" : "45.5",
-		"longitude" : "9.5"
-	},
-	"address" : {
-		"address" : "via gionni 35",
-		"city" : "Milano",
-		"prov" : "MI"
-	},
-	"pumps" : [ {
-		"fuel" : "Benzina",
-		"price" : "1.912364",
-		"isSelf" : "True"
-	} ]
-
-} ];
-
 $(document).ready(function() {
 	
 	$("#refresh-button").on("click", function() {
@@ -251,7 +205,7 @@ function printGasStationResult(data) {
 	// point from which the popup should open relative to the iconAnchor
 	});
 
-	var pumps = pumpExample; // TODO: real data
+	var pumps = data['gasStations'];
 
 	for (i = 0; i < pumps.length; i++) {
 

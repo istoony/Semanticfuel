@@ -85,6 +85,12 @@ public class GasStation {
 		return new HashCodeBuilder().append(name).append(coordinate).toHashCode();
 	}
 
+	@Override
+	public String toString() {
+		return "GasStation [pumps=" + pumps + ", coordinate=" + coordinate + ", address=" + address + ", name=" + name
+				+ ", owner=" + owner + ", flag=" + flag + ", type=" + type + "]";
+	}
+
 	public static class StationBuilder {
 		private List<FuelPump> pumps;
 		private Point coordinate;

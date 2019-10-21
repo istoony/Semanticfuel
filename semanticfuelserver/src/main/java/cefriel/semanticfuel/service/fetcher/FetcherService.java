@@ -61,7 +61,7 @@ public class FetcherService extends AbstractService {
 		if (currentTime - previousFetchingSessionTime < minMillisFromPrevSession)
 			return;
 
-		Log.info("Fetching ontology updates...");
+		LOG.info("Fetching ontology updates...");
 		long fetchingStart = System.currentTimeMillis();
 
 		// async calls to download the two sources from MISE
@@ -97,7 +97,7 @@ public class FetcherService extends AbstractService {
 			return;
 		}
 
-		Log.info("Updates fetched in " + ((System.currentTimeMillis() - fetchingStart) / 1000) + " seconds");
+		LOG.info("Updates fetched in " + ((System.currentTimeMillis() - fetchingStart) / 1000) + " seconds");
 
 		// update the ontology in memory
 		modelManager.updateOntology();

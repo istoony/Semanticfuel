@@ -62,14 +62,14 @@ public class ModelKeeperService extends AbstractService {
 	}
 
 	public void updateOntology() {
-		Log.info("Starting updating ontology...");
+		LOG.info("Starting updating ontology...");
 		long updateStart = System.currentTimeMillis();
 		long operationStart = updateStart;
 
 		// run the RML parser
 		QuadStore result = runRMLParser();
 
-		Log.debug("RML parsing finished in " + ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
+		LOG.debug("RML parsing finished in " + ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
 
 		new File(PATH_TO_MODEL).mkdirs();
 
@@ -83,7 +83,7 @@ public class ModelKeeperService extends AbstractService {
 			e1.printStackTrace();
 		}
 
-		Log.debug("Ontology written to " + ontologyPath + " in "
+		LOG.debug("Ontology written to " + ontologyPath + " in "
 				+ ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
 
 		operationStart = System.currentTimeMillis();
@@ -94,10 +94,10 @@ public class ModelKeeperService extends AbstractService {
 		// implementation of that function is left as future work)
 		readModel();
 
-		Log.debug("Ontology loaded from " + ontologyPath + " in "
+		LOG.debug("Ontology loaded from " + ontologyPath + " in "
 				+ ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
 
-		Log.info("Ontology updated in " + ((System.currentTimeMillis() - updateStart) / 1000) + " seconds");
+		LOG.info("Ontology updated in " + ((System.currentTimeMillis() - updateStart) / 1000) + " seconds");
 
 		// notify services waiting for the availability of the dataset
 		synchronized (spatialDataset) {
