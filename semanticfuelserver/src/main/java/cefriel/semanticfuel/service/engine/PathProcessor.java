@@ -62,46 +62,6 @@ public class PathProcessor extends AbstractService {
 		return multiPoligon;
 	}
 
-	private List<Point> computeRectanglesPath(List<Point> reducedList, Double L) {
-		List<Point> result = new ArrayList<Point>();
-		List<Point> back = new ArrayList<Point>();
-		for (int i = 1; i < reducedList.size(); i++) {
-			double y1 = reducedList.get(i - 1).getLatitude();
-			double x1 = reducedList.get(i - 1).getLongitude();
-
-			double y2 = reducedList.get(i).getLatitude();
-			double x2 = reducedList.get(1).getLongitude();
-
-			double m = (y2 - y1) / (x2 - x1);
-			double m2 = -1 / m;
-
-			double dx = Math.sqrt(Math.pow(L, 2) / (1 + Math.pow(m2, 2))) / 2;
-			double dy = m2 * dx;
-
-			LOG.debug("dx = {}", dx);
-			LOG.debug("dy = {}", dy);
-			LOG.debug("m = {}", m);
-			LOG.debug("m2 = {}", m2);
-
-			Point p1 = new Point(y1 + dy, x1 + dx);
-			Point p2 = new Point(y1 - dy, x1 - dx);
-			Point p3 = new Point(y2 + dy, x2 + dx);
-			Point p4 = new Point(y2 - dy, x2 - dx);
-
-			result.add(p1);
-			result.add(p3);
-			back.add(p2);
-			back.add(p4);
-		}
-
-		for (int i = back.size() - 1; i >= 0; i--) {
-			result.add(back.get(i));
-		}
-		result.add(result.get(0));
-
-		return result;
-	}
-
 	private List<Point> getSamplesFromPath(List<Point> pointList) {
 		List<Point> result = IntStream.range(0, pointList.size()).filter(i -> i % 40 == 0)
 				.mapToObj(e -> pointList.get(e)).collect(Collectors.toList());
