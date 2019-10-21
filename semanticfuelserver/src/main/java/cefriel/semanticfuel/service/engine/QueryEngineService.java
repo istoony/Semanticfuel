@@ -68,7 +68,7 @@ public class QueryEngineService extends AbstractService {
 					gasStations.put(gs.hashCode(), gs);
 			}
 		}
-
+		LOG.debug("Result: {}", gasStations);
 		return new ArrayList<>(gasStations.values());
 
 	}
