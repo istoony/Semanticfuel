@@ -198,7 +198,7 @@ function printGasStationResult(data) {
 		iconUrl : 'images/fuelmarker.png',
 
 		iconSize : [ 40, 40 ], // size of the icon
-		iconAnchor : [ 22, 94 ], // point of the icon which will correspond
+		iconAnchor : [ 20, 40 ], // point of the icon which will correspond
 		// to
 		// marker's location
 		popupAnchor : [ -3, -76 ]

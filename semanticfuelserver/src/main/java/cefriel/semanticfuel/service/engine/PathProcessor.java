@@ -6,9 +6,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.util.GeometricShapeFactory;
 import org.springframework.stereotype.Service;
@@ -19,36 +16,36 @@ import cefriel.semanticfuel.service.AbstractService;
 @Service
 public class PathProcessor extends AbstractService {
 
-	public Geometry getPathArea(List<Point> path) {
+	public List<Polygon> getPathArea(List<Point> path) {
 		List<Point> samples = getSamplesFromPath(path);
-		return computePoligons(samples.subList(0, 1));
+		return computePoligons(samples);
 	}
 
-	private MultiPolygon computePoligons(List<Point> points) {
+	private List<Polygon> computePoligons(List<Point> points) {
 		List<Polygon> result = new ArrayList<>();
-		GeometryFactory factory = new GeometryFactory();
-
-		GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
-		shapeFactory.setNumPoints(6);
-
+			
 		for (int i = 1; i < points.size(); i++) {
+			GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
+			shapeFactory.setNumPoints(8);
 			
 			Point p1 = points.get(i - 1);
 			Point p2 = points.get(i);
+			double y1 = p1.getLatitude();
+			double x1 = p1.getLongitude();
 
-			double diameter = computeDistance(p1, p2);
+			double y2 = p2.getLatitude();
+			double x2 = p2.getLongitude();
 
-			shapeFactory.setCentre(new Coordinate((p1.getLatitude() + p2.getLatitude()) / 2, (p1.getLongitude() + p2.getLongitude())/2));
-			// length in meters of 1° of longitude = 40075 km * cos( latitude ) / 360
+			double diameter = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+
+			shapeFactory.setCentre(new Coordinate((p1.getLatitude() + p2.getLatitude()) / 2,
+					(p1.getLongitude() + p2.getLongitude()) / 2));
 			shapeFactory.setHeight(diameter);
 			shapeFactory.setWidth(diameter);
-			
 
-			result.add(shapeFactory.createCircle());
+			result.add(shapeFactory.createEllipse());
 		}
-		MultiPolygon multiPoligon = new MultiPolygon(result.toArray(new Polygon[result.size()]), factory);
-		LOG.debug("Multipoligon = {}", multiPoligon);
-		return multiPoligon;
+		return result;
 	}
 
 	private List<Point> getSamplesFromPath(List<Point> pointList) {
