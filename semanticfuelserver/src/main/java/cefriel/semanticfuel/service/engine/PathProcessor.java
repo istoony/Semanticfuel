@@ -3,9 +3,7 @@ package cefriel.semanticfuel.service.engine;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.util.GeometricShapeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +26,9 @@ public class PathProcessor extends AbstractService {
 		List<Geometry> result = new ArrayList<>();
 
 		for (int i = 1; i < points.size(); i++) {
-			GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
-			shapeFactory.setNumPoints(8);
-
 			Point p1 = points.get(i - 1);
 			Point p2 = points.get(i);
+
 			double y1 = p1.getLatitude();
 			double x1 = p1.getLongitude();
 
@@ -40,11 +36,6 @@ public class PathProcessor extends AbstractService {
 			double x2 = p2.getLongitude();
 
 			double diameter = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
-
-			shapeFactory.setCentre(new Coordinate((y1 + y2) / 2, (x1 + x2) / 2));
-
-			shapeFactory.setHeight(diameter);
-			shapeFactory.setWidth(diameter);
 
 			result.add(geometryFactory.createPolygon(8, new Point((y1 + y2) / 2, (x1 + x2) / 2), diameter));
 		}

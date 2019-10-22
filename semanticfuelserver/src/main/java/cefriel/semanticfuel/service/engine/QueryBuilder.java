@@ -133,8 +133,6 @@ public class QueryBuilder {
 			for (String geomParam : geomParams.keySet()) {
 				paramString.setLiteral(geomParam,
 						"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>" + geomParams.get(geomParam).toString());
-
-				System.out.println(paramString.toString());
 			}
 
 		return paramString.asQuery();

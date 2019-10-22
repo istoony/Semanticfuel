@@ -54,8 +54,6 @@ public class QueryEngineService extends AbstractService {
 			// run the query
 			ResultSet rs = qe.execSelect();
 
-			LOG.info(query.toString());
-
 			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
 
 			// parse the result, one line per pump found (possibly multiple lines for each
