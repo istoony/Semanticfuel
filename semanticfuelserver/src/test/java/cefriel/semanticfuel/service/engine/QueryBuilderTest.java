@@ -22,8 +22,12 @@ public class QueryBuilderTest extends AbstractTest {
 		String targetQuery = " PREFIX gso: <http://gas_station.example.com/data#> " + "SELECT ?name"
 				+ " WHERE { ?station gso:name ?name } ";
 
+		String fake = query.toString().replaceAll("//s+", " ");
+
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
+
+		LOG.info(fake);
 
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}
@@ -37,6 +41,8 @@ public class QueryBuilderTest extends AbstractTest {
 
 		Query query = new QueryBuilder().buildQuery("Benzina", p);
 
+		String fake = query.toString().replaceAll("//s+", " ");
+
 		String targetQuery = "PREFIX geo: <http://www.opengis.net/ont/geosparql#> PREFIX gso: <http://gas_station.example.com/data#> PREFIX geof: <http://www.opengis.net/def/function/geosparql/> "
 				+ "SELECT ?name"
 				+ " WHERE { ?station gso:has_pump ?pump . ?pump gso:fuel \"Benzina\" . ?station geo:hasGeometry ?geom . ?geom geo:asWKT ?wkt . ?station gso:name ?name"
@@ -44,6 +50,8 @@ public class QueryBuilderTest extends AbstractTest {
 
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
+
+		LOG.info(fake);
 
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}
@@ -55,8 +63,12 @@ public class QueryBuilderTest extends AbstractTest {
 		String targetQuery = " PREFIX gso: <http://gas_station.example.com/data#> " + "SELECT ?name"
 				+ " WHERE { ?station gso:has_pump ?pump . ?pump gso:fuel \"Benzina\" . ?station gso:name ?name } ";
 
+		String fake = query.toString().replaceAll("//s+", " ");
+
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
+
+		LOG.info(fake);
 
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}
@@ -70,6 +82,8 @@ public class QueryBuilderTest extends AbstractTest {
 
 		Query query = new QueryBuilder().buildQuery(p);
 
+		String fake = query.toString().replaceAll("//s+", " ");
+
 		String targetQuery = "PREFIX geo: <http://www.opengis.net/ont/geosparql#> PREFIX gso: <http://gas_station.example.com/data#> PREFIX geof: <http://www.opengis.net/def/function/geosparql/> SELECT ?name"
 				+ " WHERE { ?station geo:hasGeometry ?geom . ?geom geo:asWKT ?wkt . ?station gso:name ?name"
 				+ " FILTER geof:sfWithin(?wkt, \"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>POINT (1 1)\"^^geo:wktLiteral) } ";
@@ -77,13 +91,16 @@ public class QueryBuilderTest extends AbstractTest {
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
 
+		LOG.info(fake);
+
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}
 
 	@Test
 	public void locationQueryTest() {
-		Query query = new QueryBuilder().addTarget(QueryBuilder.QUERY_TARGET_STATION_LAT)
-				.addTarget(QueryBuilder.QUERY_TARGET_STATION_LONG).buildQuery();
+		Query query = new QueryBuilder().addTargetGroup(QueryBuilder.QUERY_TARGET_GROUP_LOCATION).buildQuery();
+
+		String fake = query.toString().replaceAll("//s+", " ");
 
 		String targetQuery = " PREFIX wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>" + " SELECT ?lat ?long"
 				+ " WHERE { ?station wgs84_pos:location ?location . ?location wgs84_pos:lat ?lat . ?station wgs84_pos:location ?location . ?location wgs84_pos:long ?long } ";
@@ -91,18 +108,24 @@ public class QueryBuilderTest extends AbstractTest {
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
 
+		LOG.info(fake);
+
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}
 
 	@Test
 	public void addressQueryTest() {
-		Query query = new QueryBuilder().addTarget(QueryBuilder.QUERY_TARGET_STATION_CITY).buildQuery();
+		Query query = new QueryBuilder().addTargetGroup(QueryBuilder.QUERY_TARGET_GROUP_ADDRESS).buildQuery();
 
 		String targetQuery = "PREFIX gso: <http://gas_station.example.com/data#> " + "SELECT ?city "
 				+ "WHERE { ?station gso:has_address ?fullAddress . ?fullAddress gso:city ?city } ";
 
+		String fake = query.toString().replaceAll("//s+", " ");
+
 		String comparableQuery = query.toString().replaceAll("\\s+", "");
 		String comparableTargetQuery = targetQuery.replaceAll("\\s+", "");
+
+		LOG.info(fake);
 
 		assertEquals(comparableQuery, comparableTargetQuery);
 	}

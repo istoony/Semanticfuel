@@ -29,9 +29,7 @@ public class QueryEngineServiceTest extends AbstractTest {
 		// something about 1100 points
 		List<Point> testPath = directionService.getDirection(start, end);
 		List<GasStation> result = engine.getGasStations(testPath, "Benzina");
-		
-		assertTrue(result.size() > 10);
 
-		
+		assertTrue(result.size() > 10);
 	}
 }

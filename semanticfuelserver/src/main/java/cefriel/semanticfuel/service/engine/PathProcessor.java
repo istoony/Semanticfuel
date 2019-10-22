@@ -3,7 +3,7 @@ package cefriel.semanticfuel.service.engine;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +16,14 @@ public class PathProcessor extends AbstractService {
 	@Autowired
 	private GeometryBuilder geometryFactory;
 
-	public List<Polygon> getPathArea(List<Point> path) {
+	public List<Geometry> getPathArea(List<Point> path) {
 		List<Point> samples = filterByDistance(path, 1300);
 		return computePoligons(samples);
 
 	}
 
-	private List<Polygon> computePoligons(List<Point> points) {
-		List<Polygon> result = new ArrayList<>();
+	private List<Geometry> computePoligons(List<Point> points) {
+		List<Geometry> result = new ArrayList<>();
 
 		for (int i = 1; i < points.size(); i++) {
 			Point p1 = points.get(i - 1);

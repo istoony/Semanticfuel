@@ -2,10 +2,8 @@ package cefriel.semanticfuel.service.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -14,8 +12,6 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,49 +36,46 @@ public class QueryEngineService extends AbstractService {
 
 	public List<GasStation> getGasStations(List<Point> path, String fuel) {
 		// get the area where to search for stations
-		List<Polygon> searchingArea = preprocesser.getPathArea(path);
+		List<Geometry> searchingArea = preprocesser.getPathArea(path);
 
 		return getGasStaions(searchingArea, fuel);
 	}
 
-	private List<GasStation> getGasStaions(List<Polygon> area, String fuel) {
-		Set<GasStation> result = new HashSet<>();
+	private List<GasStation> getGasStaions(List<Geometry> area, String fuel) {
+		Map<Integer, GasStation> result = new HashMap<>();
 
-		List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 4);
+		// List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 7);
 
-		for (Geometry geom : geometries) {
-			// build the query
-			Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, geom);
+		// build the query
+		Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, area);
 
-			LOG.debug("Running query: \n" + query.toString());
+		LOG.debug("Running query: \n" + query.toString());
 
-			Map<Integer, GasStation> gasStations = new HashMap<>();
-			try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
-				long queryStart = System.currentTimeMillis();
+		try (QueryExecution qe = QueryExecutionFactory.create(query, modelManager.getCurrentModel())) {
+			long queryStart = System.currentTimeMillis();
 
-				// run the query
-				ResultSet rs = qe.execSelect();
+			// run the query
+			ResultSet rs = qe.execSelect();
 
-				LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
+			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
 
-				// parse the result, one line per pump found (possibly multiple lines for each
-				// station)
-				while (rs.hasNext()) {
-					GasStation gs = parseGasStation(rs.next(), fuel);
+			// parse the result, one line per pump found (possibly multiple lines for each
+			// station)
+			while (rs.hasNext()) {
+				GasStation gs = parseGasStation(rs.next(), fuel);
 
-					if (gasStations.containsKey(gs.hashCode()))
-						// if the stations map already contained this station entry, just update the
-						// pump list
-						gasStations.get(gs.hashCode()).addPumps(gs.getPumps());
-					else
-						gasStations.put(gs.hashCode(), gs);
-				}
+				if (result.containsKey(gs.hashCode()))
+					// if the stations map already contained this station entry, just update the
+					// pump list
+					result.get(gs.hashCode()).addPumps(gs.getPumps());
+				else
+					result.put(gs.hashCode(), gs);
 			}
 
-			result.addAll(gasStations.values());
+			System.out.println(result.size());
 		}
 
-		return new ArrayList<>(result);
+		return new ArrayList<>(result.values());
 
 	}
 
@@ -100,23 +93,23 @@ public class QueryEngineService extends AbstractService {
 		RDFNode stationLong = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_LONG);
 
 		StationBuilder builder = new StationBuilder();
-		if (stationName != null)
+		// if one of the station ver is not null, then same stands for the others
+		if (stationName != null) {
 			builder.setName(stationName.asLiteral().getString());
-		if (stationFlag != null)
 			builder.setFlag(stationFlag.asLiteral().getString());
-		if (stationOwner != null)
 			builder.setOwner(stationOwner.asLiteral().getString());
-		if (stationType != null)
 			builder.setType(stationType.asLiteral().getString());
+		}
 		if (stationLat != null && stationLong != null)
 			builder.setCoordinate(new Point(stationLat.asLiteral().getDouble(), stationLong.asLiteral().getDouble()));
-		String address = stationAddress != null ? stationAddress.asLiteral().getString() : null;
-		String province = stationProvince != null ? stationProvince.asLiteral().getString() : null;
-		String city = stationCity != null ? stationCity.asLiteral().getString() : null;
-		builder.setAddress(new Address(address, city, province));
-		boolean service = stationPumpService != null ? stationPumpService.asLiteral().getBoolean() : false;
-		double price = stationPumpFuelPrice != null ? stationPumpFuelPrice.asLiteral().getDouble() : 0;
-		builder.addPump(new FuelPump(fuel, price, service));
+		// if one of the address var is not null, then same stands for the others
+		if (stationAddress != null)
+			builder.setAddress(new Address(stationAddress.asLiteral().getString(), stationCity.asLiteral().getString(),
+					stationProvince.asLiteral().getString()));
+		// if one of the pump var is not null, then same stands for the others
+		if (stationPumpService != null)
+			builder.addPump(new FuelPump(fuel, stationPumpFuelPrice.asLiteral().getDouble(),
+					stationPumpService.asLiteral().getBoolean()));
 
 		return builder.build();
 	}

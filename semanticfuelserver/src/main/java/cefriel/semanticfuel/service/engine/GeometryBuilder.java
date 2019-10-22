@@ -29,7 +29,6 @@ public class GeometryBuilder extends AbstractService {
 	public Polygon createCircle(int npoints, Point center, double diameter) {
 		GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
 		shapeFactory.setNumPoints(npoints);
-
 		shapeFactory.setCentre(new Coordinate(center.getLatitude(), center.getLongitude()));
 		shapeFactory.setHeight(diameter);
 		shapeFactory.setWidth(diameter);

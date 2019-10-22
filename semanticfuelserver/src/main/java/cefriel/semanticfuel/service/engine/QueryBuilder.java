@@ -1,5 +1,6 @@
 package cefriel.semanticfuel.service.engine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,9 +16,7 @@ import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
 import org.locationtech.jts.geom.Geometry;
 
-import cefriel.semanticfuel.service.AbstractService;
-
-public class QueryBuilder extends AbstractService {
+public class QueryBuilder {
 	private static final String PREFIX_GEO = "geo";
 	private static final String PREFIX_GSO = "gso";
 	private static final String PREFIX_GEOF = "geof";
@@ -44,8 +43,8 @@ public class QueryBuilder extends AbstractService {
 	protected static final String QUERY_TARGET_GROUP_ADDRESS = "address";
 	protected static final String QUERY_TARGET_GROUP_PUMP = "pump";
 
+	private static final String QUERY_PARAM_AREA = "geomParam";
 	private static final String QUERY_PARAM_FUEL = "fuelParam";
-	private static final String QUERY_PARAM_AREA = "areaParam";
 
 	private static final String QUERY_VAR_STATION = "?station";
 	private static final String QUERY_VAR_GEOM = "?geom";
@@ -60,29 +59,43 @@ public class QueryBuilder extends AbstractService {
 	private Map<WhereClause, Integer> clauses;
 	private Map<WhereFilter, Integer> filters;
 	private PrefixMapping prefixes;
+	private Map<String, Geometry> geomParams;
 
 	public QueryBuilder() {
 		targets = new HashSet<>();
 		clauses = new HashMap<>();
 		filters = new HashMap<>();
 		prefixes = PrefixMapping.Factory.create();
+		geomParams = new HashMap<>();
 
 		paramString = new ParameterizedSparqlString();
 	}
 
 	public Query buildQuery() {
-		return buildQuery(null, null);
+		String fuel = null;
+		return buildQuery(fuel);
 	}
 
 	public Query buildQuery(String fuel) {
-		return buildQuery(fuel, null);
+		List<Geometry> list = null;
+		return buildQuery(fuel, list);
 	}
 
 	public Query buildQuery(Geometry geom) {
 		return buildQuery(null, geom);
 	}
 
-	public Query buildQuery(String fuel, Geometry target) {
+	public Query buildQuery(List<Geometry> geoms) {
+		return buildQuery(null, geoms);
+	}
+
+	public Query buildQuery(String fuel, Geometry geom) {
+		List<Geometry> geoms = new ArrayList<>();
+		geoms.add(geom);
+		return buildQuery(fuel, geoms);
+	}
+
+	public Query buildQuery(String fuel, List<Geometry> target) {
 		if (fuel != null) {
 			// add the part of the query dealing with fuel parameter
 			addNamespace(PREFIX_GSO, NS_GSO);
@@ -96,12 +109,16 @@ public class QueryBuilder extends AbstractService {
 			addNamespace(PREFIX_GEOF, NS_GEOF);
 			addWhereClause(QUERY_VAR_STATION, "geo:hasGeometry", QUERY_VAR_GEOM);
 			addWhereClause(QUERY_VAR_GEOM, "geo:asWKT", QUERY_VAR_WKT);
-			addWhereFilter("geof:sfWithin", QUERY_VAR_WKT, "?" + QUERY_PARAM_AREA + "^^geo:wktLiteral");
+
+			for (Geometry geom : target) {
+				addWhereFilter("geof:sfWithin", QUERY_VAR_WKT, "?" + QUERY_PARAM_AREA + "^^geo:wktLiteral");
+				geomParams.put(QUERY_PARAM_AREA + geomParams.size(), geom);
+			}
 		}
 
-		// select at least the name of the stations
+		// select at least the attributes of the stations, if no target is specifieds
 		if (targets.isEmpty())
-			addTarget(QUERY_TARGET_STATION_NAME);
+			addTargetGroup(QUERY_TARGET_GROUP_STATION);
 
 		// build the parameterized command
 		String command = buildCommand();
@@ -111,8 +128,9 @@ public class QueryBuilder extends AbstractService {
 		if (fuel != null)
 			paramString.setLiteral(QUERY_PARAM_FUEL, fuel);
 		if (target != null)
-			paramString.setLiteral(QUERY_PARAM_AREA,
-					"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>" + target.toString());
+			for (String geomParam : geomParams.keySet())
+				paramString.setLiteral(geomParam,
+						"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>" + geomParams.get(geomParam).toString());
 
 		return paramString.asQuery();
 	}
@@ -151,7 +169,7 @@ public class QueryBuilder extends AbstractService {
 		return this;
 	}
 
-	public QueryBuilder addTarget(String target) {
+	private QueryBuilder addTarget(String target) {
 		switch (target) {
 		case QUERY_TARGET_STATION_NAME:
 			addNamespace(PREFIX_GSO, NS_GSO);
@@ -228,17 +246,17 @@ public class QueryBuilder extends AbstractService {
 		}
 
 		if (!filters.isEmpty()) {
-			query += " . ";
+			query += " . FILTER (";
 
 			List<WhereFilter> filtersList = filters.entrySet().stream().sorted(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey).collect(Collectors.toList());
 
 			for (int i = 0; i < filtersList.size(); i++) {
 				WhereFilter wf = filtersList.get(i);
-				query += " FILTER(" + wf.function + " (";
+				query += wf.function + " (";
 				for (int j = 0; j < wf.params.length; j++)
 					query += wf.params[j] + (j == wf.params.length - 1 ? "" : ",");
-				query += "))" + (i == filtersList.size() - 1 ? "" : " . ");
+				query += ")" + (i == filtersList.size() - 1 ? ")" : " || ");
 			}
 		}
 
