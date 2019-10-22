@@ -31,9 +31,6 @@ public class QueryEngineService extends AbstractService {
 	@Autowired
 	private PathProcessor preprocesser;
 
-	@Autowired
-	private GeometryBuilder geometryBuilder;
-
 	public List<GasStation> getGasStations(List<Point> path, String fuel) {
 		// get the area where to search for stations
 		List<Geometry> searchingArea = preprocesser.getPathArea(path);
@@ -56,6 +53,8 @@ public class QueryEngineService extends AbstractService {
 
 			// run the query
 			ResultSet rs = qe.execSelect();
+
+			LOG.info(query.toString());
 
 			LOG.info("Query executed in " + ((System.currentTimeMillis() - queryStart) / 1000) + " seconds");
 

@@ -2,18 +2,17 @@ package cefriel.semanticfuel.service.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.jena.geosparql.implementation.jts.CustomCoordinateSequenceFactory;
 import org.apache.jena.query.Query;
 import org.junit.jupiter.api.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFactory;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import cefriel.semanticfuel.model.Point;
 import cefriel.semanticfuel.utils.AbstractTest;
 
 public class QueryBuilderTest extends AbstractTest {
+	@Autowired
+	private GeometryBuilder geometryBuilder;
 
 	@Test
 	public void minimalQueryTest() {
@@ -34,12 +33,9 @@ public class QueryBuilderTest extends AbstractTest {
 
 	@Test
 	public void fuelGeomQueryTest() {
-		CoordinateSequenceFactory pointFactory = new CustomCoordinateSequenceFactory();
-		Coordinate[] coordinates = { new Coordinate(1, 1) };
-		CoordinateSequence cSequence = pointFactory.create(coordinates);
-		Point p = new Point(cSequence, new GeometryFactory());
+		Geometry geom = geometryBuilder.createCircle(8, new Point(45.0, 10.0), 1000);
 
-		Query query = new QueryBuilder().buildQuery("Benzina", p);
+		Query query = new QueryBuilder().buildQuery("Benzina", geom);
 
 		String fake = query.toString().replaceAll("//s+", " ");
 
@@ -75,12 +71,9 @@ public class QueryBuilderTest extends AbstractTest {
 
 	@Test
 	public void areaQueryTest() {
-		CoordinateSequenceFactory pointFactory = new CustomCoordinateSequenceFactory();
-		Coordinate[] coordinates = { new Coordinate(1, 1) };
-		CoordinateSequence cSequence = pointFactory.create(coordinates);
-		Point p = new Point(cSequence, new GeometryFactory());
+		Geometry geom = geometryBuilder.createCircle(8, new Point(45.0, 10.0), 1000);
 
-		Query query = new QueryBuilder().buildQuery(p);
+		Query query = new QueryBuilder().buildQuery(geom);
 
 		String fake = query.toString().replaceAll("//s+", " ");
 

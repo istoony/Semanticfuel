@@ -26,14 +26,14 @@ public class GeometryBuilder extends AbstractService {
 		gf = new GeometryFactory();
 	}
 
-	public Polygon createCircle(int npoints, Point center, double diameter) {
+	public Polygon createPolygon(int npoints, Point center, double diameter) {
 		GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
 		shapeFactory.setNumPoints(npoints);
 		shapeFactory.setCentre(new Coordinate(center.getLatitude(), center.getLongitude()));
 		shapeFactory.setHeight(diameter);
 		shapeFactory.setWidth(diameter);
 
-		return shapeFactory.createCircle();
+		return shapeFactory.createEllipse();
 	}
 
 	public List<MultiPolygon> createMultyPoligons(List<Polygon> polygons, int maxsize) {

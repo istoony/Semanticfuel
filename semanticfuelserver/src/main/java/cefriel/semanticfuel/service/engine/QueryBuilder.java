@@ -14,6 +14,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.shared.PrefixMapping;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
+import org.jline.utils.Log;
 import org.locationtech.jts.geom.Geometry;
 
 public class QueryBuilder {
@@ -111,7 +112,8 @@ public class QueryBuilder {
 			addWhereClause(QUERY_VAR_GEOM, "geo:asWKT", QUERY_VAR_WKT);
 
 			for (Geometry geom : target) {
-				addWhereFilter("geof:sfWithin", QUERY_VAR_WKT, "?" + QUERY_PARAM_AREA + "^^geo:wktLiteral");
+				addWhereFilter("geof:sfWithin", QUERY_VAR_WKT,
+						"?" + QUERY_PARAM_AREA + geomParams.size() + "^^geo:wktLiteral");
 				geomParams.put(QUERY_PARAM_AREA + geomParams.size(), geom);
 			}
 		}
@@ -128,9 +130,12 @@ public class QueryBuilder {
 		if (fuel != null)
 			paramString.setLiteral(QUERY_PARAM_FUEL, fuel);
 		if (target != null)
-			for (String geomParam : geomParams.keySet())
+			for (String geomParam : geomParams.keySet()) {
 				paramString.setLiteral(geomParam,
 						"<http://www.opengis.net/def/crs/OGC/1.3/CRS84>" + geomParams.get(geomParam).toString());
+
+				System.out.println(paramString.toString());
+			}
 
 		return paramString.asQuery();
 	}
@@ -250,6 +255,8 @@ public class QueryBuilder {
 
 			List<WhereFilter> filtersList = filters.entrySet().stream().sorted(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey).collect(Collectors.toList());
+
+			Log.error(filters.size());
 
 			for (int i = 0; i < filtersList.size(); i++) {
 				WhereFilter wf = filtersList.get(i);
