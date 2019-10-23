@@ -68,7 +68,7 @@ public class ModelKeeperService extends AbstractService {
 		// run the RML parser
 		QuadStore result = runRMLParser();
 
-		LOG.debug("RML parsing finished in " + ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
+		LOG.info("RML parsing finished in " + ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
 
 		new File(PATH_TO_MODEL).mkdirs();
 
@@ -77,13 +77,13 @@ public class ModelKeeperService extends AbstractService {
 		// write the model into a file
 		String ontologyPath = PATH_TO_MODEL + File.separator + MODEL_FILE_TTL;
 		try {
-			result.write(new FileWriter(ontologyPath), RDFFormat.TURTLE.toString());
+			result.write(new FileWriter(ontologyPath), "turtle");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 
-		LOG.debug("Ontology written to " + ontologyPath + " in "
-				+ ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
+		LOG.info("Ontology written to " + ontologyPath + " in " + ((System.currentTimeMillis() - operationStart) / 1000)
+				+ " seconds");
 
 		operationStart = System.currentTimeMillis();
 
@@ -93,7 +93,7 @@ public class ModelKeeperService extends AbstractService {
 		// implementation of that function is left as future work)
 		readModel();
 
-		LOG.debug("Ontology loaded from " + ontologyPath + " in "
+		LOG.info("Ontology loaded from " + ontologyPath + " in "
 				+ ((System.currentTimeMillis() - operationStart) / 1000) + " seconds");
 
 		LOG.info("Ontology updated in " + ((System.currentTimeMillis() - updateStart) / 1000) + " seconds");
