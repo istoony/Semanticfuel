@@ -41,8 +41,6 @@ public class QueryEngineService extends AbstractService {
 	private List<GasStation> getGasStaions(List<Geometry> area, String fuel) {
 		Map<Integer, GasStation> result = new HashMap<>();
 
-		// List<MultiPolygon> geometries = geometryBuilder.createMultyPoligons(area, 7);
-
 		// build the query
 		Query query = new QueryBuilder().addAllTarget().buildQuery(fuel, area);
 
@@ -61,15 +59,13 @@ public class QueryEngineService extends AbstractService {
 			while (rs.hasNext()) {
 				GasStation gs = parseGasStation(rs.next(), fuel);
 
-				if (result.containsKey(gs.hashCode()))
+				if (result.containsKey(gs.hashCode())) {
 					// if the stations map already contained this station entry, just update the
 					// pump list
 					result.get(gs.hashCode()).addPumps(gs.getPumps());
-				else
+				} else
 					result.put(gs.hashCode(), gs);
 			}
-
-			System.out.println(result.size());
 		}
 
 		return new ArrayList<>(result.values());
@@ -90,7 +86,7 @@ public class QueryEngineService extends AbstractService {
 		RDFNode stationLong = queryRaw.get(QueryBuilder.QUERY_TARGET_STATION_LONG);
 
 		StationBuilder builder = new StationBuilder();
-		// if one of the station ver is not null, then same stands for the others
+		// if one of the station var is not null, then same stands for the others
 		if (stationName != null) {
 			builder.setName(stationName.asLiteral().getString());
 			builder.setFlag(stationFlag.asLiteral().getString());

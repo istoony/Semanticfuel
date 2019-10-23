@@ -14,7 +14,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.shared.PrefixMapping;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
-import org.jline.utils.Log;
 import org.locationtech.jts.geom.Geometry;
 
 public class QueryBuilder {
@@ -253,8 +252,6 @@ public class QueryBuilder {
 
 			List<WhereFilter> filtersList = filters.entrySet().stream().sorted(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey).collect(Collectors.toList());
-
-			Log.error(filters.size());
 
 			for (int i = 0; i < filtersList.size(); i++) {
 				WhereFilter wf = filtersList.get(i);
