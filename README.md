@@ -35,13 +35,11 @@ target/semanticfuelserver-0.0.1-SNAPSHOT.jar
 
 ## Authors
 
-* **Antonio Gianola** - [PurpleBooth](https://github.com/Istoony)
+* **Antonio Gianola** 
 * **Michele Todero**
 * **Enrico Calafiore**
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
 ## License
 
-This project is provided ASIS.
+This project is provided AS-IS.
 
