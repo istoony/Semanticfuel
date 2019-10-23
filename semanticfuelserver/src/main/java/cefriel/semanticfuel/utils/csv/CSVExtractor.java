@@ -17,9 +17,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import cefriel.semanticfuel.service.AbstractService;
-
-public class CSVExtractor extends AbstractService {
+public class CSVExtractor {
 	private CSVParser parser;
 	private BufferedReader reader;
 	private Map<String, BiFunction<String, String, Map<String, String>>> parsers;

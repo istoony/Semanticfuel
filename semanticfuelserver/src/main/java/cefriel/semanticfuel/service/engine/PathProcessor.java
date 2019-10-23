@@ -17,7 +17,7 @@ public class PathProcessor extends AbstractService {
 	private GeometryBuilder geometryFactory;
 
 	public List<Geometry> getPathArea(List<Point> path) {
-		List<Point> samples = filterByDistance(path, 1300);
+		List<Point> samples = filterByDistance(path, 1000);
 		return computePoligons(samples);
 
 	}
@@ -35,7 +35,7 @@ public class PathProcessor extends AbstractService {
 			double y2 = p2.getLatitude();
 			double x2 = p2.getLongitude();
 
-			double diameter = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+			double diameter = Math.sqrt(2 * Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
 
 			result.add(geometryFactory.createPolygon(8, new Point((y1 + y2) / 2, (x1 + x2) / 2), diameter));
 		}

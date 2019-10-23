@@ -18,14 +18,4 @@ public class GeoUtils {
 
 		return d;
 	}
-
-	public static Double computeSlope(Point p1, Point p2) {
-		double y1 = p1.getLatitude();
-		double x1 = p1.getLongitude();
-
-		double y2 = p2.getLatitude();
-		double x2 = p2.getLongitude();
-
-		return (y2 - y1) / (x2 - x1);
-	}
 }
