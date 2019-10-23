@@ -210,7 +210,7 @@ function printGasStationResult(data) {
 		var isNotSelfPrice = 'Non presente';
 
 		for (var j = 0; j < pumps[i]['pumps'].length; j++) {
-			if (pumps[i]['pumps'][j]['isSelf'] == "True") { // TODO occhio qua
+			if (pumps[i]['pumps'][j]['self'] == true) {
 				isSelfPrice = (Math.round(pumps[i]['pumps'][j]['price'] * 1000) / 1000)
 						+ "€";
 			} else {
